@@ -56,6 +56,12 @@ func loadAbi(filename string) abi.ABI {
 	must(err)
 	return abiObj
 }
+func getTPS(start time.Time, end time.Time) int64 {
+	dur := end.Sub(start)
+	sec, _ := time.ParseDuration("1s")
+
+	return sec.Nanoseconds() / dur.Nanoseconds()
+}
 
 func main() {
 	binFilePath := "./sum.bin"
@@ -161,10 +167,18 @@ func main() {
 	input := append(method.ID, pm...)
 	fmt.Println(hexutil.Encode(input))
 
+	startTime := time.Now()
 	fmt.Println("begin to exec contract")
 	statedb.SetCode(testAddress, contractCode)
 	outputs, gasLeft, vmerr := evm.Call(contractRef, testAddress, input, statedb.GetBalance(testAddress).Uint64(), big.NewInt(0))
 	must(vmerr)
+	endTime := time.Now()
+
+	executionTime := endTime.Sub(startTime)
+	fmt.Printf("function executed in %v nanoseconds\n", executionTime.Nanoseconds())
+
+	tps := getTPS(startTime, endTime)
+	fmt.Printf("Theoretical TPS is %v\n", tps)
 
 	statedb.SetBalance(testAddress, big.NewInt(0).SetUint64(gasLeft))
 	testBalance = statedb.GetBalance(testAddress)
