@@ -155,26 +155,10 @@ func main() {
 
 	// calling the contract
 
-	inttypes, err := abi.NewType("uint", "uint256", []abi.ArgumentMarshaling{})
-	must(err)
-
-	abiCall := abi.NewMethod(
-		"multiply",
-		"",
-		abi.FunctionType(1),
-		"view",
-		false,
-		false,
-		[]abi.Argument{abi.Argument{Name: "a", Type: inttypes}},
-		[]abi.Argument{abi.Argument{Name: "d", Type: inttypes}},
-	)
-
-	pm := common.BigToHash(big.NewInt(-10)).Hex()
-	fmt.Println(pm)
-
-	inputstr := hexutil.Encode(abiCall.ID) + pm[2:]
-	input, err := hexutil.Decode((inputstr))
-	must(err)
+	method := abiObj.Methods["multiply"]
+	pm := gm.U256Bytes(big.NewInt(10))
+	input := append(method.ID, pm...)
+	fmt.Println(hexutil.Encode(input))
 
 	fmt.Println("begin to exec contract")
 	statedb.SetCode(testAddress, contractCode)
