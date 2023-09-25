@@ -168,6 +168,14 @@ func main() {
 	statedb.SetBalance(testAddress, big.NewInt(0).SetUint64(gasLeft))
 	testBalance = statedb.GetBalance(testAddress)
 	fmt.Println("after call contract, testBalance =", testBalance)
+	for _, op := range method.Outputs {
+		switch op.Type.String() {
+		case "uint256":
+			fmt.Printf("Output name=%s, value=%d\n", op.Name, big.NewInt(0).SetBytes(outputs))
+		default:
+			fmt.Println(op.Name, op.Type.String())
+		}
+	}
 	fmt.Printf("Output %#v\n", hexutil.Encode(outputs))
 
 }
