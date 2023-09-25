@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math/big"
 	"time"
+	"os"
+	"io/ioutil"
 
 	ec "github.com/daweth/gevm/core"
 	//	"github.com/daweth/gevm/logger"
@@ -12,14 +14,14 @@ import (
 	//	"github.com/daweth/gevm/vm"
 	"github.com/ethereum/go-ethereum/core"
 
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/eth/tracers/logger"
-
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/ethdb/pebble"
 	"github.com/ethereum/go-ethereum/params"
 )
@@ -39,12 +41,26 @@ func must(err error) {
 	if err != nil {
 		panic(err)
 	}
+}	
+func loadBin(filename string) []byte {
+	code, err := ioutil.ReadFile(filename)
+	must(err)
+	return hexutil.MustDecode("0x" + string(code))
+}
+func loadAbi(filename string) abi.ABI {
+	abiFile, err := os.Open(filename)
+	must(err)
+	defer abiFile.Close()
+	abiObj, err := abi.JSON(abiFile)
+	must(err)
+	return abiObj
 }
 
 func main() {
-
-	data, err := hexutil.Decode(codeStr)
-	must(err)
+	binFilePath := "./sum.bin"
+	abiFilePath := "./sum.abi"
+	data := loadBin(binFilePath)
+	abiObj := loadAbi(abiFilePath)
 
 	alice, err := testAddress.MarshalText()
 	must(err)
@@ -92,7 +108,7 @@ func main() {
 	btx := ec.NewEVMBlockContext(&header, cc, &testAddress)
 	ctx := ec.NewEVMTxContext(&message)
 
-	pbl, err := pebble.New("db", 0, 0, "gevm", false, false)
+	pbl, err := pebble.New("gevm-db", 0, 0, "gevm", false, false)
 	must(err)
 
 	rdb := rawdb.NewDatabase(pbl)
@@ -126,6 +142,9 @@ func main() {
 	}
 
 	evm := vm.NewEVM(btx, ctx, statedb, chainConfig, vmConfig)
+
+	// creating the contract
+
 	contractRef := vm.AccountRef(testAddress)
 	contractCode, _, gasLeftOver, vmerr := evm.Create(contractRef, data, statedb.GetBalance(testAddress).Uint64(), big.NewInt(0))
 	must(vmerr)
@@ -134,7 +153,38 @@ func main() {
 	testBalance = statedb.GetBalance(testAddress)
 	fmt.Println("after contract creation, testBalance=", testBalance, contractCode)
 
-	//	inttypes, err := abi.NewType("uint")
+	// calling the contract
+
+	inttypes, err := abi.NewType("uint", "uint256", []abi.ArgumentMarshaling{})
+	must(err)
+
+	abiCall := abi.NewMethod(
+		"multiply",
+		"",
+		abi.FunctionType(1),
+		"view",
+		false,
+		false,
+		[]abi.Argument{abi.Argument{Name: "a", Type: inttypes}},
+		[]abi.Argument{abi.Argument{Name: "d", Type: inttypes}},
+	)
+
+	pm := common.BigToHash(big.NewInt(-10)).Hex()
+	fmt.Println(pm)
+
+	inputstr := hexutil.Encode(abiCall.ID) + pm[2:]
+	input, err := hexutil.Decode((inputstr))
+	must(err)
+
+	fmt.Println("begin to exec contract")
+	statedb.SetCode(testAddress, contractCode)
+	outputs, gasLeft, vmerr := evm.Call(contractRef, testAddress, input, statedb.GetBalance(testAddress).Uint64(), big.NewInt(0))
+	must(vmerr)
+
+	statedb.SetBalance(testAddress, big.NewInt(0).SetUint64(gasLeft))
+	testBalance = statedb.GetBalance(testAddress)
+	fmt.Println("after call contract, testBalance =", testBalance)
+	fmt.Printf("Output %#v\n", hexutil.Encode(outputs))
 
 }
 
