@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"math/big"
-	"time"
-	"os"
 	"io/ioutil"
+	"math/big"
+	"os"
+	"time"
 
 	ec "github.com/daweth/gevm/core"
 	//	"github.com/daweth/gevm/logger"
@@ -17,6 +17,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	gm "github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -41,7 +42,7 @@ func must(err error) {
 	if err != nil {
 		panic(err)
 	}
-}	
+}
 func loadBin(filename string) []byte {
 	code, err := ioutil.ReadFile(filename)
 	must(err)
