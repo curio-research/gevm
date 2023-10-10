@@ -151,20 +151,20 @@ func main() {
 	// create new EVM
 	evm := vm.NewEVM(btx, ctx, statedb, chainConfig, vmConfig)
 
+	callerRef := vm.AccountRef(testAddress)
+
 	// creating the contract
-	contractRef := vm.AccountRef(testAddress)
-	contractCode, contractAddress, gasLeftOver, vmerr := evm.Create(contractRef, data, statedb.GetBalance(testAddress).Uint64(), big.NewInt(0))
+	_, contractAddress, gasLeftOver, vmerr := evm.Create(callerRef, data, statedb.GetBalance(testAddress).Uint64(), big.NewInt(0))
 	fmt.Println("contract address=", contractAddress)
 	must(vmerr)
 
-	// fund the account
+	// deduct the gas
 	statedb.SetBalance(testAddress, big.NewInt(0).SetUint64(gasLeftOver))
 	testBalance = statedb.GetBalance(testAddress)
-	fmt.Println("after contract creation, testBalance=", testBalance, contractCode)
+	fmt.Println("after contract creation, testBalance=", testBalance)
 
-	// calling the contract
+	// MINT TRANSACTION
 
-	// create mint transaction
 	method := abiObj.Methods["mint"]
 	pm := gm.U256Bytes(big.NewInt(10))
 	input := append(method.ID, pm...)
@@ -173,10 +173,10 @@ func main() {
 	// execute the transaction
 	fmt.Println("begin to exec contract")
 	//statedb.SetCode(testAddress, contractCode)
-	outputs, gasLeft, vmerr := evm.Call(contractRef, contractAddress, input, statedb.GetBalance(testAddress).Uint64(), big.NewInt(0))
+	outputs, gasLeft, vmerr := evm.Call(callerRef, contractAddress, input, statedb.GetBalance(testAddress).Uint64(), big.NewInt(0))
 	must(vmerr)
 	// after transaction cleanup
-	statedb.SetBalance(testAddress, big.NewInt(0).SetUint64(gasLeft))
+	statedb.SetBalance(contractAddress, big.NewInt(0).SetUint64(gasLeft))
 	testBalance = statedb.GetBalance(testAddress)
 	fmt.Println("after call contract, testBalance =", testBalance)
 
@@ -192,7 +192,11 @@ func main() {
 	// get the balance of the user
 	method = abiObj.Methods["balanceOf"]
 	input1 := append(method.ID, common.LeftPadBytes(testAddress[:], 32)...)
-	outputs, gasLeft, vmerr = evm.Call(contractRef, contractAddress, input1, statedb.GetBalance(testAddress).Uint64(), big.NewInt(0))
+	outputs, gasLeft, vmerr = evm.Call(callerRef, contractAddress, input1, statedb.GetBalance(testAddress).Uint64(), big.NewInt(0))
+	// deduct the gas
+	statedb.SetBalance(testAddress, big.NewInt(0).SetUint64(gasLeftOver))
+	testBalance = statedb.GetBalance(testAddress)
+	fmt.Println("after contract creation, testBalance=", testBalance)
 
 	for _, op := range method.Outputs {
 		switch op.Type.String() {
@@ -207,16 +211,22 @@ func main() {
 
 	// create the transaction data for transfer
 	method = abiObj.Methods["transfer"]
-	input2 := append(method.ID, common.LeftPadBytes(testAddress[:], 32)...)
+	input2 := append(method.ID, common.LeftPadBytes(toAddress[:], 32)...)
 	pm = gm.U256Bytes(big.NewInt(1))
 	input2 = append(input2, pm...)
-	fmt.Println(hexutil.Encode(input))
 
 	startTime := time.Now()
 	fmt.Println("begin to exec contract")
+
 	// execute the transaction
-	outputs, gasLeft, vmerr = evm.Call(contractRef, contractAddress, input2, statedb.GetBalance(testAddress).Uint64(), big.NewInt(0))
+	outputs, gasLeft, vmerr = evm.Call(callerRef, contractAddress, input2, statedb.GetBalance(testAddress).Uint64(), big.NewInt(0))
 	must(vmerr)
+
+	// deduct the gas
+	statedb.SetBalance(testAddress, big.NewInt(0).SetUint64(gasLeftOver))
+	testBalance = statedb.GetBalance(testAddress)
+	fmt.Println("after contract creation, testBalance=", testBalance)
+
 	endTime := time.Now()
 
 	executionTime := endTime.Sub(startTime)
@@ -236,6 +246,25 @@ func main() {
 			fmt.Printf("Output name=%s, value=%d\n", op.Name, big.NewInt(0).SetBytes(outputs))
 		default:
 			fmt.Println(op.Name, op.Type.String(), hexutil.Encode(outputs))
+		}
+	}
+
+	// get the balance of the user
+	method = abiObj.Methods["balanceOf"]
+	input3 := append(method.ID, common.LeftPadBytes(toAddress[:], 32)...)
+	outputs, gasLeft, vmerr = evm.Call(callerRef, contractAddress, input3, statedb.GetBalance(testAddress).Uint64(), big.NewInt(0))
+	// deduct the gas
+	statedb.SetBalance(testAddress, big.NewInt(0).SetUint64(gasLeftOver))
+	testBalance = statedb.GetBalance(testAddress)
+	fmt.Println("after contract creation, testBalance=", testBalance)
+
+	// should be 9
+	for _, op := range method.Outputs {
+		switch op.Type.String() {
+		case "uint256":
+			fmt.Printf("Output name=%s, value=%d\n", op.Name, big.NewInt(0).SetBytes(outputs))
+		default:
+			fmt.Println(op.Name, op.Type.String(), hexutil.Encode((outputs)))
 		}
 	}
 
