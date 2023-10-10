@@ -115,14 +115,14 @@ func main() {
 	btx := ec.NewEVMBlockContext(&header, cc, &testAddress)
 	ctx := ec.NewEVMTxContext(&message)
 
+	// create database
 	pbl, err := pebble.New("gevm-db", 0, 0, "gevm", false, false)
 	must(err)
-
 	rdb := rawdb.NewDatabase(pbl)
 	db := state.NewDatabaseWithConfig(rdb, nil)
-
 	statedb, err := state.New(common.Hash{}, db, nil)
 
+	// fill database with addresses
 	statedb.GetOrNewStateObject(testAddress)
 	statedb.GetOrNewStateObject(toAddress)
 	statedb.AddBalance(testAddress, big.NewInt(1e18))
@@ -130,6 +130,7 @@ func main() {
 	fmt.Println("testBalance =", testBalance)
 	must(err)
 
+	// create structLogger (for EVM config)
 	chainConfig := params.TestChainConfig
 	logConfig := logger.Config{
 		EnableMemory:     true,
@@ -148,20 +149,21 @@ func main() {
 		ExtraEips:               []int{},
 	}
 
+	// create new EVM
 	evm := vm.NewEVM(btx, ctx, statedb, chainConfig, vmConfig)
 
 	// creating the contract
-
 	contractRef := vm.AccountRef(testAddress)
-	contractCode, _, gasLeftOver, vmerr := evm.Create(contractRef, data, statedb.GetBalance(testAddress).Uint64(), big.NewInt(0))
+	contractCode, contractAddress, gasLeftOver, vmerr := evm.Create(contractRef, data, statedb.GetBalance(testAddress).Uint64(), big.NewInt(0))
+	fmt.Println("contract address=", contractAddress)
 	must(vmerr)
 
+	// fund the account
 	statedb.SetBalance(testAddress, big.NewInt(0).SetUint64(gasLeftOver))
 	testBalance = statedb.GetBalance(testAddress)
 	fmt.Println("after contract creation, testBalance=", testBalance, contractCode)
 
 	// calling the contract
-
 	method := abiObj.Methods["multiply"]
 	pm := gm.U256Bytes(big.NewInt(10))
 	input := append(method.ID, pm...)
@@ -183,6 +185,7 @@ func main() {
 	statedb.SetBalance(testAddress, big.NewInt(0).SetUint64(gasLeft))
 	testBalance = statedb.GetBalance(testAddress)
 	fmt.Println("after call contract, testBalance =", testBalance)
+
 	for _, op := range method.Outputs {
 		switch op.Type.String() {
 		case "uint256":
