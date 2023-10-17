@@ -19,10 +19,15 @@ type request struct {
 
 // response is a JSON RPC response package sent back from the API server.
 type response struct {
-	JsonRpc string          `json:"jsonrpc"` // Version of the JSON RPC protocol, always set to 2.0
-	Id      int             `json:"id"`      // Auto incrementing ID number for this request
-	Error   json.RawMessage `json:"error"`   // Any error returned by the remote side
-	Result  json.RawMessage `json:"result"`  // Whatever the remote side sends us in reply
+	JsonRpc string `json:"jsonrpc"` // Version of the JSON RPC protocol, always set to 2.0
+	Id      int    `json:"id"`      // Auto incrementing ID number for this request
+	Error   []byte `json:"error"`   // Any error returned by the remote side
+	Result  []byte `json:"result"`  // Whatever the remote side sends us in reply
+}
+
+func stringToRawMessage(s string) json.RawMessage {
+	msg := json.RawMessage([]byte(fmt.Sprintf("{\"data\": \"%v\"}", s)))
+	return msg
 }
 
 func main() {
@@ -44,12 +49,21 @@ func main() {
 
 		fmt.Println("printing the context", req)
 
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Received!",
-			"request": req,
-		})
+		// c.json(http.statusok, gin.h{
+		// 	"message": "received!",
+		// 	"request": req,
+		// })
 
-		//		c.JSON(http.StatusOK, gin.H{"jsonrpc": "2.0", "id": 1, "result": "0x3503de5f0c766c68f78a03a3b05036a5"})
+		resp := response{
+			JsonRpc: "2.0",
+			Id:      2,
+			Error:   nil,
+			Result:  []byte("hello"),
+		}
+
+		// Result:  json.RawMessage([]byte("0x3503de5f0c766c68f78a03a3b05036a5")),
+		c.PureJSON(http.StatusOK, resp)
+
 	})
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
