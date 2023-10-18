@@ -14,9 +14,10 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package core
+package gevm
 
 import (
+	"fmt"
 	"math/big"
 
 	//	"github.com/daweth/gevm/types"
@@ -124,4 +125,12 @@ func CanTransfer(db vm.StateDB, addr common.Address, amount *big.Int) bool {
 func Transfer(db vm.StateDB, sender, recipient common.Address, amount *big.Int) {
 	db.SubBalance(sender, amount)
 	db.AddBalance(recipient, amount)
+}
+
+// default chainContext implementation
+type EmptyChainContext struct{}
+
+func (cc EmptyChainContext) GetHeader(hash common.Hash, number uint64) *types.Header {
+	fmt.Println("(cc ChainContext) GetHeader (hash common.Hash, number uint64)")
+	return nil
 }
