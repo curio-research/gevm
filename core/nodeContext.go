@@ -4,8 +4,8 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -110,4 +110,10 @@ func must(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (n *NodeCtx) HandleTransaction(txn Transaction) ([]byte, uint64) {
+	outputs, gasLeft, vmerr := n.Evm.Call(txn.From, txn.To, txn.Data, txn.Gas, txn.Value)
+	must(vmerr)
+	return outputs, gasLeft
 }
