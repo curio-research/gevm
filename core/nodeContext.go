@@ -1,9 +1,11 @@
-package gevm
+package cvm
 
 import (
+	"fmt"
 	"math/big"
 	"time"
 
+	"github.com/daweth/gevm/server"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/rawdb"
@@ -34,7 +36,8 @@ func NewNodeContext(gasLimit uint64, gasUsed uint64, accounts ...common.Address)
 	statedb, err := state.New(common.Hash{}, db, nil)
 
 	// fill database with addresses
-	for i := 1; i < len(accounts); i++ {
+	for i := 0; i < len(accounts); i++ {
+		fmt.Println("seeding the balance of the new account", accounts[i])
 		statedb.GetOrNewStateObject(accounts[i])
 		statedb.AddBalance(accounts[i], big.NewInt(1e18))
 	}
@@ -112,8 +115,18 @@ func must(err error) {
 	}
 }
 
-func (n *NodeCtx) HandleTransaction(txn Transaction) ([]byte, uint64) {
-	outputs, gasLeft, vmerr := n.Evm.Call(txn.From, txn.To, txn.Data, txn.Gas, txn.Value)
+func (n *NodeCtx) HandleTransaction(txn server.Transaction) ([]byte, uint64) {
+	value := big.NewInt(0).SetUint64(txn.Value)
+	outputs, gasLeft, vmerr := n.Evm.Call(StringToContractRef(txn.From), StringToAddress(txn.To), []byte(txn.Data), txn.Gas, value)
 	must(vmerr)
 	return outputs, gasLeft
+}
+
+func StringToContractRef(s string) vm.ContractRef {
+	hex := common.HexToAddress(s)
+	return vm.AccountRef(hex)
+}
+
+func StringToAddress(s string) common.Address {
+	return common.HexToAddress(s)
 }
