@@ -1,11 +1,11 @@
-package cvm
+package core
 
 import (
 	"fmt"
 	"math/big"
 	"time"
 
-	"github.com/daweth/gevm/server"
+	"github.com/daweth/gevm/gevmtypes"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/rawdb"
@@ -109,13 +109,24 @@ func NewNodeContext(gasLimit uint64, gasUsed uint64, accounts ...common.Address)
 
 }
 
+var (
+	gasLimit = uint64(1000000000000)
+	gasUsed  = uint64(1)
+	admin    = common.HexToAddress("alice")
+	account1 = common.HexToAddress("bob")
+)
+
+func Default() NodeCtx {
+	return NewNodeContext(gasLimit, gasUsed, admin, account1)
+}
+
 func must(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (n *NodeCtx) HandleTransaction(txn server.Transaction) ([]byte, uint64) {
+func (n *NodeCtx) HandleTransaction(txn gevmtypes.Transaction) ([]byte, uint64) {
 	value := big.NewInt(0).SetUint64(txn.Value)
 	outputs, gasLeft, vmerr := n.Evm.Call(StringToContractRef(txn.From), StringToAddress(txn.To), []byte(txn.Data), txn.Gas, value)
 	must(vmerr)
