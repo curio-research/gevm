@@ -85,11 +85,7 @@ interface IERC20 {
      *
      * Emits a {Transfer} event.
      */
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) external returns (bool);
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
 
     /**
      * @dev Emitted when `value` tokens are moved from one account (`from`) to
@@ -195,11 +191,7 @@ interface ITemporarilyPausable {
     function getPausedState()
         external
         view
-        returns (
-            bool paused,
-            uint256 pauseWindowEndTime,
-            uint256 bufferPeriodEndTime
-        );
+        returns (bool paused, uint256 pauseWindowEndTime, uint256 bufferPeriodEndTime);
 }
 
 // This program is free software: you can redistribute it and/or modify
@@ -246,7 +238,7 @@ interface IWETH is IERC20 {
  * This concept is unrelated to a Pool's Asset Managers.
  */
 interface IAsset {
-    // solhint-disable-previous-line no-empty-blocks
+// solhint-disable-previous-line no-empty-blocks
 }
 
 // This program is free software: you can redistribute it and/or modify
@@ -266,11 +258,7 @@ interface IAuthorizer {
     /**
      * @dev Returns true if `account` can perform the action described by `actionId` in the contract `where`.
      */
-    function canPerform(
-        bytes32 actionId,
-        address account,
-        address where
-    ) external view returns (bool);
+    function canPerform(bytes32 actionId, address account, address where) external view returns (bool);
 }
 
 // This program is free software: you can redistribute it and/or modify
@@ -323,11 +311,7 @@ interface IProtocolFeesCollector {
     event SwapFeePercentageChanged(uint256 newSwapFeePercentage);
     event FlashLoanFeePercentageChanged(uint256 newFlashLoanFeePercentage);
 
-    function withdrawCollectedFees(
-        IERC20[] calldata tokens,
-        uint256[] calldata amounts,
-        address recipient
-    ) external;
+    function withdrawCollectedFees(IERC20[] calldata tokens, uint256[] calldata amounts, address recipient) external;
 
     function setSwapFeePercentage(uint256 newSwapFeePercentage) external;
 
@@ -411,11 +395,7 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
      *
      * Emits a `RelayerApprovalChanged` event.
      */
-    function setRelayerApproval(
-        address sender,
-        address relayer,
-        bool approved
-    ) external;
+    function setRelayerApproval(address sender, address relayer, bool approved) external;
 
     /**
      * @dev Emitted every time a relayer is approved or disapproved by `setRelayerApproval`.
@@ -448,7 +428,7 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
 
     /**
      * @dev Data for `manageUserBalance` operations, which include the possibility for ETH to be sent and received
-     without manual WETH wrapping or unwrapping.
+     *  without manual WETH wrapping or unwrapping.
      */
     struct UserBalanceOp {
         UserBalanceOpKind kind;
@@ -496,7 +476,12 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
     //
     // Emits an `ExternalBalanceTransfer` event.
 
-    enum UserBalanceOpKind { DEPOSIT_INTERNAL, WITHDRAW_INTERNAL, TRANSFER_INTERNAL, TRANSFER_EXTERNAL }
+    enum UserBalanceOpKind {
+        DEPOSIT_INTERNAL,
+        WITHDRAW_INTERNAL,
+        TRANSFER_INTERNAL,
+        TRANSFER_EXTERNAL
+    }
 
     /**
      * @dev Emitted when a user's Internal Balance changes, either from calls to `manageUserBalance`, or through
@@ -529,7 +514,11 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
     //  - Two Token: only allows two tokens to be registered. This achieves the lowest possible swap gas cost. Like
     // minimal swap info Pools, these are called via IMinimalSwapInfoPool.
 
-    enum PoolSpecialization { GENERAL, MINIMAL_SWAP_INFO, TWO_TOKEN }
+    enum PoolSpecialization {
+        GENERAL,
+        MINIMAL_SWAP_INFO,
+        TWO_TOKEN
+    }
 
     /**
      * @dev Registers the caller account as a Pool with a given specialization setting. Returns the Pool's ID, which
@@ -578,11 +567,7 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
      *
      * Emits a `TokensRegistered` event.
      */
-    function registerTokens(
-        bytes32 poolId,
-        IERC20[] memory tokens,
-        address[] memory assetManagers
-    ) external;
+    function registerTokens(bytes32 poolId, IERC20[] memory tokens, address[] memory assetManagers) external;
 
     /**
      * @dev Emitted when a Pool registers tokens by calling `registerTokens`.
@@ -627,12 +612,7 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
     function getPoolTokenInfo(bytes32 poolId, IERC20 token)
         external
         view
-        returns (
-            uint256 cash,
-            uint256 managed,
-            uint256 lastChangeBlock,
-            address assetManager
-        );
+        returns (uint256 cash, uint256 managed, uint256 lastChangeBlock, address assetManager);
 
     /**
      * @dev Returns a Pool's registered tokens, the total balance for each, and the latest block when *any* of
@@ -651,11 +631,7 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
     function getPoolTokens(bytes32 poolId)
         external
         view
-        returns (
-            IERC20[] memory tokens,
-            uint256[] memory balances,
-            uint256 lastChangeBlock
-        );
+        returns (IERC20[] memory tokens, uint256[] memory balances, uint256 lastChangeBlock);
 
     /**
      * @dev Called by users to join a Pool, which transfers tokens from `sender` into the Pool's balance. This will
@@ -689,12 +665,9 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
      *
      * Emits a `PoolBalanceChanged` event.
      */
-    function joinPool(
-        bytes32 poolId,
-        address sender,
-        address recipient,
-        JoinPoolRequest memory request
-    ) external payable;
+    function joinPool(bytes32 poolId, address sender, address recipient, JoinPoolRequest memory request)
+        external
+        payable;
 
     struct JoinPoolRequest {
         IAsset[] assets;
@@ -738,12 +711,8 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
      *
      * Emits a `PoolBalanceChanged` event.
      */
-    function exitPool(
-        bytes32 poolId,
-        address sender,
-        address payable recipient,
-        ExitPoolRequest memory request
-    ) external;
+    function exitPool(bytes32 poolId, address sender, address payable recipient, ExitPoolRequest memory request)
+        external;
 
     struct ExitPoolRequest {
         IAsset[] assets;
@@ -763,7 +732,10 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
         uint256[] protocolFeeAmounts
     );
 
-    enum PoolBalanceChangeKind { JOIN, EXIT }
+    enum PoolBalanceChangeKind {
+        JOIN,
+        EXIT
+    }
 
     // Swaps
     //
@@ -812,7 +784,10 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
     //
     // Finally, Internal Balance can be used when either sending or receiving tokens.
 
-    enum SwapKind { GIVEN_IN, GIVEN_OUT }
+    enum SwapKind {
+        GIVEN_IN,
+        GIVEN_OUT
+    }
 
     /**
      * @dev Performs a swap with a single Pool.
@@ -827,12 +802,10 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
      *
      * Emits a `Swap` event.
      */
-    function swap(
-        SingleSwap memory singleSwap,
-        FundManagement memory funds,
-        uint256 limit,
-        uint256 deadline
-    ) external payable returns (uint256);
+    function swap(SingleSwap memory singleSwap, FundManagement memory funds, uint256 limit, uint256 deadline)
+        external
+        payable
+        returns (uint256);
 
     /**
      * @dev Data for a single swap executed by `swap`. `amount` is either `amountIn` or `amountOut` depending on
@@ -913,11 +886,7 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
      * @dev Emitted for each individual swap performed by `swap` or `batchSwap`.
      */
     event Swap(
-        bytes32 indexed poolId,
-        IERC20 indexed tokenIn,
-        IERC20 indexed tokenOut,
-        uint256 amountIn,
-        uint256 amountOut
+        bytes32 indexed poolId, IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 amountIn, uint256 amountOut
     );
 
     /**
@@ -1031,7 +1000,11 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
      * Updates don't affect the Pool's cash balance, but because the managed balance changes, it does alter the total.
      * The external amount can be either increased or decreased by this call (i.e., reporting a gain or a loss).
      */
-    enum PoolBalanceOpKind { WITHDRAW, DEPOSIT, UPDATE }
+    enum PoolBalanceOpKind {
+        WITHDRAW,
+        DEPOSIT,
+        UPDATE
+    }
 
     /**
      * @dev Emitted when a Pool's token Asset Manager alters its balance via `managePoolBalance`.
@@ -1092,11 +1065,7 @@ interface IProtocolFeesCollector {
     event SwapFeePercentageChanged(uint256 newSwapFeePercentage);
     event FlashLoanFeePercentageChanged(uint256 newFlashLoanFeePercentage);
 
-    function withdrawCollectedFees(
-        IERC20[] calldata tokens,
-        uint256[] calldata amounts,
-        address recipient
-    ) external;
+    function withdrawCollectedFees(IERC20[] calldata tokens, uint256[] calldata amounts, address recipient) external;
 
     function setSwapFeePercentage(uint256 newSwapFeePercentage) external;
 
@@ -1152,12 +1121,8 @@ interface IProtocolFeePercentagesProvider {
      *
      * It is not possible to de-register fee types, nor change their name or maximum value.
      */
-    function registerFeeType(
-        uint256 feeType,
-        string memory name,
-        uint256 maximumValue,
-        uint256 initialValue
-    ) external;
+    function registerFeeType(uint256 feeType, string memory name, uint256 maximumValue, uint256 initialValue)
+        external;
 
     /**
      * @dev Returns true if `feeType` has been registered and can be queried.
@@ -1303,11 +1268,7 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
      *
      * Emits a `RelayerApprovalChanged` event.
      */
-    function setRelayerApproval(
-        address sender,
-        address relayer,
-        bool approved
-    ) external;
+    function setRelayerApproval(address sender, address relayer, bool approved) external;
 
     /**
      * @dev Emitted every time a relayer is approved or disapproved by `setRelayerApproval`.
@@ -1340,7 +1301,7 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
 
     /**
      * @dev Data for `manageUserBalance` operations, which include the possibility for ETH to be sent and received
-     without manual WETH wrapping or unwrapping.
+     *  without manual WETH wrapping or unwrapping.
      */
     struct UserBalanceOp {
         UserBalanceOpKind kind;
@@ -1388,7 +1349,12 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
     //
     // Emits an `ExternalBalanceTransfer` event.
 
-    enum UserBalanceOpKind { DEPOSIT_INTERNAL, WITHDRAW_INTERNAL, TRANSFER_INTERNAL, TRANSFER_EXTERNAL }
+    enum UserBalanceOpKind {
+        DEPOSIT_INTERNAL,
+        WITHDRAW_INTERNAL,
+        TRANSFER_INTERNAL,
+        TRANSFER_EXTERNAL
+    }
 
     /**
      * @dev Emitted when a user's Internal Balance changes, either from calls to `manageUserBalance`, or through
@@ -1421,7 +1387,11 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
     //  - Two Token: only allows two tokens to be registered. This achieves the lowest possible swap gas cost. Like
     // minimal swap info Pools, these are called via IMinimalSwapInfoPool.
 
-    enum PoolSpecialization { GENERAL, MINIMAL_SWAP_INFO, TWO_TOKEN }
+    enum PoolSpecialization {
+        GENERAL,
+        MINIMAL_SWAP_INFO,
+        TWO_TOKEN
+    }
 
     /**
      * @dev Registers the caller account as a Pool with a given specialization setting. Returns the Pool's ID, which
@@ -1470,11 +1440,7 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
      *
      * Emits a `TokensRegistered` event.
      */
-    function registerTokens(
-        bytes32 poolId,
-        IERC20[] memory tokens,
-        address[] memory assetManagers
-    ) external;
+    function registerTokens(bytes32 poolId, IERC20[] memory tokens, address[] memory assetManagers) external;
 
     /**
      * @dev Emitted when a Pool registers tokens by calling `registerTokens`.
@@ -1519,12 +1485,7 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
     function getPoolTokenInfo(bytes32 poolId, IERC20 token)
         external
         view
-        returns (
-            uint256 cash,
-            uint256 managed,
-            uint256 lastChangeBlock,
-            address assetManager
-        );
+        returns (uint256 cash, uint256 managed, uint256 lastChangeBlock, address assetManager);
 
     /**
      * @dev Returns a Pool's registered tokens, the total balance for each, and the latest block when *any* of
@@ -1543,11 +1504,7 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
     function getPoolTokens(bytes32 poolId)
         external
         view
-        returns (
-            IERC20[] memory tokens,
-            uint256[] memory balances,
-            uint256 lastChangeBlock
-        );
+        returns (IERC20[] memory tokens, uint256[] memory balances, uint256 lastChangeBlock);
 
     /**
      * @dev Called by users to join a Pool, which transfers tokens from `sender` into the Pool's balance. This will
@@ -1581,12 +1538,9 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
      *
      * Emits a `PoolBalanceChanged` event.
      */
-    function joinPool(
-        bytes32 poolId,
-        address sender,
-        address recipient,
-        JoinPoolRequest memory request
-    ) external payable;
+    function joinPool(bytes32 poolId, address sender, address recipient, JoinPoolRequest memory request)
+        external
+        payable;
 
     struct JoinPoolRequest {
         IAsset[] assets;
@@ -1630,12 +1584,8 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
      *
      * Emits a `PoolBalanceChanged` event.
      */
-    function exitPool(
-        bytes32 poolId,
-        address sender,
-        address payable recipient,
-        ExitPoolRequest memory request
-    ) external;
+    function exitPool(bytes32 poolId, address sender, address payable recipient, ExitPoolRequest memory request)
+        external;
 
     struct ExitPoolRequest {
         IAsset[] assets;
@@ -1655,7 +1605,10 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
         uint256[] protocolFeeAmounts
     );
 
-    enum PoolBalanceChangeKind { JOIN, EXIT }
+    enum PoolBalanceChangeKind {
+        JOIN,
+        EXIT
+    }
 
     // Swaps
     //
@@ -1704,7 +1657,10 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
     //
     // Finally, Internal Balance can be used when either sending or receiving tokens.
 
-    enum SwapKind { GIVEN_IN, GIVEN_OUT }
+    enum SwapKind {
+        GIVEN_IN,
+        GIVEN_OUT
+    }
 
     /**
      * @dev Performs a swap with a single Pool.
@@ -1719,12 +1675,10 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
      *
      * Emits a `Swap` event.
      */
-    function swap(
-        SingleSwap memory singleSwap,
-        FundManagement memory funds,
-        uint256 limit,
-        uint256 deadline
-    ) external payable returns (uint256);
+    function swap(SingleSwap memory singleSwap, FundManagement memory funds, uint256 limit, uint256 deadline)
+        external
+        payable
+        returns (uint256);
 
     /**
      * @dev Data for a single swap executed by `swap`. `amount` is either `amountIn` or `amountOut` depending on
@@ -1805,11 +1759,7 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
      * @dev Emitted for each individual swap performed by `swap` or `batchSwap`.
      */
     event Swap(
-        bytes32 indexed poolId,
-        IERC20 indexed tokenIn,
-        IERC20 indexed tokenOut,
-        uint256 amountIn,
-        uint256 amountOut
+        bytes32 indexed poolId, IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 amountIn, uint256 amountOut
     );
 
     /**
@@ -1923,7 +1873,11 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
      * Updates don't affect the Pool's cash balance, but because the managed balance changes, it does alter the total.
      * The external amount can be either increased or decreased by this call (i.e., reporting a gain or a loss).
      */
-    enum PoolBalanceOpKind { WITHDRAW, DEPOSIT, UPDATE }
+    enum PoolBalanceOpKind {
+        WITHDRAW,
+        DEPOSIT,
+        UPDATE
+    }
 
     /**
      * @dev Emitted when a Pool's token Asset Manager alters its balance via `managePoolBalance`.
@@ -2021,11 +1975,7 @@ function _require(bool condition, uint256 errorCode) pure {
  * @dev Reverts if `condition` is false, with a revert reason containing `errorCode`. Only codes up to 999 are
  * supported.
  */
-function _require(
-    bool condition,
-    uint256 errorCode,
-    bytes3 prefix
-) pure {
+function _require(bool condition, uint256 errorCode, bytes3 prefix) pure {
     if (!condition) _revert(errorCode, prefix);
 }
 
@@ -2381,11 +2331,7 @@ abstract contract SingletonAuthentication is Authentication {
         return getAuthorizer().canPerform(actionId, account, address(this));
     }
 
-    function _canPerform(
-        bytes32 actionId,
-        address account,
-        address where
-    ) internal view returns (bool) {
+    function _canPerform(bytes32 actionId, address account, address where) internal view returns (bool) {
         return getAuthorizer().canPerform(actionId, account, where);
     }
 }
@@ -2454,11 +2400,7 @@ contract ProtocolFeePercentagesProvider is IProtocolFeePercentagesProvider, Sing
     uint256 private constant _MAX_PROTOCOL_SWAP_FEE_PERCENTAGE = 50e16; // 50%
     uint256 private constant _MAX_PROTOCOL_FLASH_LOAN_FEE_PERCENTAGE = 1e16; // 1%
 
-    constructor(
-        IVault vault,
-        uint256 maxYieldValue,
-        uint256 maxAUMValue
-    ) SingletonAuthentication(vault) {
+    constructor(IVault vault, uint256 maxYieldValue, uint256 maxAUMValue) SingletonAuthentication(vault) {
         IProtocolFeesCollector protocolFeeCollector = vault.getProtocolFeesCollector();
         _protocolFeesCollector = protocolFeeCollector; // Note that this is immutable in the Vault as well
 
@@ -2483,22 +2425,18 @@ contract ProtocolFeePercentagesProvider is IProtocolFeePercentagesProvider, Sing
         _;
     }
 
-    function registerFeeType(
-        uint256 feeType,
-        string memory name,
-        uint256 maximumValue,
-        uint256 initialValue
-    ) external override authenticate {
+    function registerFeeType(uint256 feeType, string memory name, uint256 maximumValue, uint256 initialValue)
+        external
+        override
+        authenticate
+    {
         require(!_feeTypeData[feeType].registered, "Fee type already registered");
         _registerFeeType(feeType, name, maximumValue, initialValue);
     }
 
-    function _registerFeeType(
-        uint256 feeType,
-        string memory name,
-        uint256 maximumValue,
-        uint256 initialValue
-    ) private {
+    function _registerFeeType(uint256 feeType, string memory name, uint256 maximumValue, uint256 initialValue)
+        private
+    {
         require((maximumValue > 0) && (maximumValue <= _MAX_PROTOCOL_FEE_PERCENTAGE), "Invalid maximum fee percentage");
         require(initialValue <= maximumValue, "Invalid initial percentage");
 
@@ -2576,4 +2514,3 @@ contract ProtocolFeePercentagesProvider is IProtocolFeePercentagesProvider, Sing
         return _feeTypeData[feeType].name;
     }
 }
-

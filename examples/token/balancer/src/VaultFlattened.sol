@@ -138,6 +138,7 @@ interface IAuthorizer {
         address account,
         address where
     ) external view returns (bool);
+
 }
 
 // This program is free software: you can redistribute it and/or modify
@@ -609,6 +610,7 @@ interface IAuthorizer {
         address account,
         address where
     ) external view returns (bool);
+
 }
 
 // This program is free software: you can redistribute it and/or modify
