@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	cvm "github.com/daweth/gevm/core"
-	"github.com/gin-gonic/gin"
 	gt "github.com/daweth/gevm/gevmtypes"
+	"github.com/gin-gonic/gin"
 )
 
 type App struct {
@@ -31,6 +31,7 @@ func NewServer() *App {
 
 	app.Server.POST("/rpc", func(c *gin.Context) {
 		var req gt.Request
+		var resp gt.Response
 		if err := c.BindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}
@@ -41,7 +42,7 @@ func NewServer() *App {
 
 		case "eth_call":
 			fmt.Println("eth call")
-			app.handleEthCall(req)
+			resp = app.handleEthCall(req)
 		case "eth_send":
 			fmt.Println("eth send")
 		case "eth_sendRawTransaction":
@@ -51,16 +52,16 @@ func NewServer() *App {
 		case "eth_getTransactionCount":
 			fmt.Println("get transaction count")
 		case "eth_getCode":
-			fmt.Println("get code")
+			fmt.Println("handling get code")
+		default:
+			resp = gt.Response{
+				JsonRpc: "2.0",
+				Id:      2,
+				Error:   nil,
+				Result:  []byte("hello"),
+			}
 		}
-
-		resp := gt.Response{
-			JsonRpc: "2.0",
-			Id:      2,
-			Error:   nil,
-			Result:  []byte("hello"),
-		}
-
+		
 		// Result:  json.RawMessage([]byte("0x3503de5f0c766c68f78a03a3b05036a5")),
 		c.PureJSON(http.StatusOK, resp)
 	})
