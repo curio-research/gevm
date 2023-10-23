@@ -1,8 +1,0 @@
-syntax="proto3";
-
-package transport;
-
-message RpcMsg {
-    string name = 1;
-    int32 age = 2;
-}
