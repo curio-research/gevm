@@ -1,6 +1,7 @@
 package core
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"time"
@@ -127,12 +128,17 @@ func must(err error) {
 }
 
 func (n *NodeCtx) HandleTransaction(txn gevmtypes.Transaction) ([]byte, uint64) {
+	if n == nil {
+		// return empty data types if node context does not exist
+		return []byte(""), 0
+	}
 	value := big.NewInt(0).SetUint64(txn.Value)
 	outputs, gasLeft, vmerr := n.Evm.Call(StringToContractRef(txn.From), StringToAddress(txn.To), []byte(txn.Data), txn.Gas, value)
 	must(vmerr)
 	return outputs, gasLeft
 }
 
+// HELPER FUNCTIONS
 func StringToContractRef(s string) vm.ContractRef {
 	hex := common.HexToAddress(s)
 	return vm.AccountRef(hex)
@@ -140,4 +146,9 @@ func StringToContractRef(s string) vm.ContractRef {
 
 func StringToAddress(s string) common.Address {
 	return common.HexToAddress(s)
+}
+
+func StringToRawMessage(s string) json.RawMessage {
+	msg := json.RawMessage([]byte(fmt.Sprintf("{\"data\": \"%v\"}", s)))
+	return msg
 }

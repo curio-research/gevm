@@ -91,7 +91,3 @@ func (app *App) handleEthCall(r gt.Request) gt.Response {
 	}
 }
 
-// func stringToRawMessage(s string) json.RawMessage {
-// 	msg := json.RawMessage([]byte(fmt.Sprintf("{\"data\": \"%v\"}", s)))
-// 	return msg
-// }
