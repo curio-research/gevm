@@ -105,6 +105,7 @@ var PrecompiledContractsCancun = map[common.Address]PrecompiledContract{
 	common.BytesToAddress([]byte{8}):    &bn256PairingIstanbul{},
 	common.BytesToAddress([]byte{9}):    &blake2F{},
 	common.BytesToAddress([]byte{0x0a}): &kzgPointEvaluation{},
+	common.BytesToAddress([]byte{0x11}): &gameWeather{},
 }
 
 // PrecompiledContractsBLS contains the set of pre-compiled Ethereum
@@ -176,6 +177,31 @@ func RunPrecompiledContract(p PrecompiledContract, input []byte, suppliedGas uin
 	suppliedGas -= gasCost
 	output, err := p.Run(input)
 	return output, suppliedGas, err
+}
+
+var (
+	errConstInvalidInputLength = errors.New("invalid input length")
+)
+
+type gameWeather struct{}
+
+func (g *gameWeather) RequiredGas(input []byte) uint64 {
+	// same as 'identity'
+	// TODO: adjust for input size
+	return uint64(15)
+}
+
+func (g *gameWeather) Run(input []byte) ([]byte, error) {
+	if len(input) > 4 {
+		return nil, errConstInvalidInputLength
+	}
+
+	// insert logic for game engine
+
+	output := []byte{0x0}
+
+	return output, nil
+
 }
 
 // ECRECOVER implemented as a native contract.
