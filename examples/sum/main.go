@@ -8,10 +8,6 @@ import (
 	"time"
 
 	ec "github.com/daweth/gevm/core"
-	//	"github.com/daweth/gevm/logger"
-	//	"github.com/daweth/gevm/state"
-	//	"github.com/daweth/gevm/types"
-	//	"github.com/daweth/gevm/vm"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
