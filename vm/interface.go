@@ -19,7 +19,9 @@ package vm
 import (
 	"math/big"
 
-	"github.com/daweth/gevm/types"
+	// "github.com/daweth/gevm/types"
+	"github.com/ethereum/go-ethereum/core/types"
+
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/params"
