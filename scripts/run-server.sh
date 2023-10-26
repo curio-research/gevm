@@ -14,8 +14,8 @@ else
         exit 1
     else
         echo "go version: $v"
-        OUTPUT=$(go run main.go)
-        echo "running the main script, cleaning up files"
+        cd ..
+        OUTPUT=$(go run ../main.go)
         # rm -rf ./gevm-db/
         # rm ./gevm
         echo $OUTPUT
