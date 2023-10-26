@@ -6,21 +6,28 @@ import (
 	"math/big"
 	"time"
 
+	// logger "github.com/daweth/gevm/logger"
+	// "github.com/daweth/gevm/state"
+	"github.com/daweth/gevm/types"
+	"github.com/daweth/gevm/util"
+	"github.com/daweth/gevm/vm"
+
 	"github.com/daweth/gevm/gevmtypes"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/eth/tracers/logger"
+
+	gstate "github.com/ethereum/go-ethereum/core/state"
+	gtypes "github.com/ethereum/go-ethereum/core/types"
+	gvm "github.com/ethereum/go-ethereum/core/vm"
+	glogger "github.com/ethereum/go-ethereum/eth/tracers/logger"
 	"github.com/ethereum/go-ethereum/ethdb/pebble"
 	"github.com/ethereum/go-ethereum/params"
 )
 
 type NodeCtx struct {
 	Accounts []common.Address // accounts that this node handles.
-	StateDB  *state.StateDB
+	StateDB  *gstate.StateDB
 	Evm      *vm.EVM
 }
 
@@ -33,8 +40,8 @@ func NewNodeContext(gasLimit uint64, gasUsed uint64, accounts ...common.Address)
 	pbl, err := pebble.New("gevm-db", 0, 0, "gevm", false, false)
 	must(err)
 	rdb := rawdb.NewDatabase(pbl)
-	db := state.NewDatabaseWithConfig(rdb, nil)
-	statedb, err := state.New(common.Hash{}, db, nil)
+	db := gstate.NewDatabaseWithConfig(rdb, nil)
+	statedb, err := gstate.New(common.Hash{}, db, nil)
 
 	// fill database with addresses
 	for i := 0; i < len(accounts); i++ {
@@ -71,7 +78,7 @@ func NewNodeContext(gasLimit uint64, gasUsed uint64, accounts ...common.Address)
 		GasFeeCap:         big.NewInt(0),
 		GasTipCap:         big.NewInt(0),
 		Data:              []byte(""),
-		AccessList:        types.AccessList{},
+		AccessList:        gtypes.AccessList{},
 		BlobGasFeeCap:     big.NewInt(0),
 		BlobHashes:        []common.Hash{},
 		SkipAccountChecks: false,
@@ -80,9 +87,10 @@ func NewNodeContext(gasLimit uint64, gasUsed uint64, accounts ...common.Address)
 	cc := EmptyChainContext{}
 	btx := NewEVMBlockContext(&header, cc, &accounts[0])
 	ctx := NewEVMTxContext(&message)
+
 	// create structLogger (for EVM config)
 	chainConfig := params.TestChainConfig
-	logConfig := logger.Config{
+	logConfig := glogger.Config{
 		EnableMemory:     true,
 		DisableStack:     true,
 		DisableStorage:   false,
@@ -91,16 +99,16 @@ func NewNodeContext(gasLimit uint64, gasUsed uint64, accounts ...common.Address)
 		Limit:            0,
 		Overrides:        chainConfig,
 	}
-	logger := logger.NewStructLogger(&logConfig)
-	vmConfig := vm.Config{
+	logger := glogger.NewStructLogger(&logConfig)
+	vmConfig := gvm.Config{
 		Tracer:                  logger,
 		NoBaseFee:               true,
 		EnablePreimageRecording: false,
 		ExtraEips:               []int{},
 	}
-
+	vmcfg := util.ConvertGConfigToConfig(vmConfig, logConfig)
 	// create new EVM
-	evm := vm.NewEVM(btx, ctx, statedb, chainConfig, vmConfig)
+	evm := vm.NewEVM(btx, ctx, statedb, chainConfig, vmcfg)
 
 	return NodeCtx{
 		Accounts: accounts,
