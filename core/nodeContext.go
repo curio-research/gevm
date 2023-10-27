@@ -59,7 +59,7 @@ func NewNodeContext(gasLimit uint64, gasUsed uint64, accounts ...common.Address)
 		ReceiptHash: common.Hash{},
 		Bloom:       types.BytesToBloom([]byte("daweth")),
 		Difficulty:  big.NewInt(1),
-		Number:      big.NewInt(1),
+		Number:      big.NewInt(18437836),
 		GasLimit:    gasLimit,
 		GasUsed:     gasUsed,
 		Time:        uint64(time.Now().Unix()),
