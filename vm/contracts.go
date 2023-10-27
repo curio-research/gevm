@@ -105,7 +105,7 @@ var PrecompiledContractsCancun = map[common.Address]PrecompiledContract{
 	common.BytesToAddress([]byte{8}):    &bn256PairingIstanbul{},
 	common.BytesToAddress([]byte{9}):    &blake2F{},
 	common.BytesToAddress([]byte{0x0a}): &kzgPointEvaluation{},
-	common.BytesToAddress([]byte{0x11}): &gameWeather{},
+	common.BytesToAddress([]byte{0x0b}): &gameWeather{},
 }
 
 // PrecompiledContractsBLS contains the set of pre-compiled Ethereum
@@ -198,7 +198,11 @@ func (g *gameWeather) Run(input []byte) ([]byte, error) {
 
 	// insert logic for game engine
 
-	output := []byte{0x0}
+    // insert logic for game engine
+
+    output := make([]byte, 32)  // create a 32-byte slice filled with zeroes
+    output[31] = 0x01           // set the last byte to the uint8 value 1
+
 
 	return output, nil
 
