@@ -3,7 +3,9 @@ pragma solidity ^0.6.0;
 contract weather {
 
     function gameWeather() public view returns(uint8) {
+
         uint8 result;
+
         assembly {
             let freeMemoryPointer := mload(0x40) // Get the current free memory pointer
             // Call the custom precompile at address 0x0b with no input and expecting a 32-byte return value
