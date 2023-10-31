@@ -14,7 +14,7 @@ contract weather {
 
             // Handle failure
             if iszero(success) {
-                revert(0, 0)
+                revert(9, 0)
             }
         }
         return result;
