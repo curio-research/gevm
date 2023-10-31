@@ -11,23 +11,38 @@ import (
 )
 
 type App struct {
-	Server *gin.Engine
-	Node   cvm.NodeCtx
+	Server  *gin.Engine
+	Node    cvm.NodeCtx
+	Weather gt.Weather
 }
 
 func NewServer() *App {
 	app := &App{
-		Server: gin.Default(),
-		Node:   cvm.Default(),
+		Server:  gin.Default(),
+		Node:    cvm.Default(),
+		Weather: gt.Weather{0}, // initialize to 0
 	}
 
 	app.Server.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"jsonrpc": "2.0", "id": 1, "result": "0x3503de5f0c766c68f78a03a3b05036a5"})
 	})
 
+	// since we don't have signatures they need to be manually created in db
 	// app.Server.POST("/addAccount", func(c *gin.Context)) {
-
 	// }
+
+	app.Server.POST("/setWeather", func(c *gin.Context) {
+		fmt.Println("printing the request body", c.Request.Body)
+		var w gt.Weather
+
+		if err := c.BindJSON(&w); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+
+		app.handleSetWeather(w)
+		fmt.Println("printing the new weather value", w.Weather)
+		c.JSON(http.StatusOK, gin.H{"status": "Success"})
+	})
 
 	app.Server.POST("/rpc", func(c *gin.Context) {
 		var req gt.Request
@@ -61,7 +76,7 @@ func NewServer() *App {
 				Result:  []byte("hello"),
 			}
 		}
-		
+
 		// Result:  json.RawMessage([]byte("0x3503de5f0c766c68f78a03a3b05036a5")),
 		c.PureJSON(http.StatusOK, resp)
 	})
@@ -91,3 +106,7 @@ func (app *App) handleEthCall(r gt.Request) gt.Response {
 	}
 }
 
+func (app *App) handleSetWeather(r gt.Weather) {
+	w := &app.Weather
+	w.Weather = r.Weather
+}

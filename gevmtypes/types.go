@@ -28,6 +28,11 @@ type Transaction struct {
 	Data     string `json:"data"`
 }
 
+// weather is a type sent when changing / getting weather
+type Weather struct {
+	Weather int `json:"weather"`
+}
+
 type BlockNumber string
 
 type Address string
