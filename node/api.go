@@ -60,14 +60,18 @@ func NewServer() *App {
 			resp = app.handleEthCall(req)
 		case "eth_send":
 			fmt.Println("eth send")
+			// resp = app.handleEthSend(req)
 		case "eth_sendRawTransaction":
 			fmt.Println("eth send raw txn")
 		case "eth_getBalance":
 			fmt.Println("get bal")
+			// resp = app.handleGetBalance(req)
 		case "eth_getTransactionCount":
 			fmt.Println("get transaction count")
+			// resp = app.handleGetTxCount(req)
 		case "eth_getCode":
 			fmt.Println("handling get code")
+			// resp = app.handleGetCode(req)
 		default:
 			resp = gt.Response{
 				JsonRpc: "2.0",
@@ -89,12 +93,11 @@ func (app *App) handleEthCall(r gt.Request) gt.Response {
 
 	var tx gt.Transaction
 	if err := json.Unmarshal([]byte(p[0].(string)), &tx); err != nil {
-		// Handle the error
+		// handle the error
 	}
 	// tx := p[0].BindJSON(Transaction)
 	//bl := p[1].BindJSON(BlockNumber)
 
-	// handle transaction here using fn from
 	o, g := app.Node.HandleTransaction(tx)
 
 	return gt.Response{
@@ -105,6 +108,11 @@ func (app *App) handleEthCall(r gt.Request) gt.Response {
 		GasLeft: g,
 	}
 }
+
+// func (app *App) handleEthSend(r gt.Request) gt.Response {
+// 	p := r.Params
+
+// }
 
 func (app *App) handleSetWeather(r gt.Weather) {
 	w := &app.Weather
