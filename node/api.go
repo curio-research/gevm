@@ -109,10 +109,45 @@ func (app *App) handleEthCall(r gt.Request) gt.Response {
 	}
 }
 
-// func (app *App) handleEthSend(r gt.Request) gt.Response {
-// 	p := r.Params
+func (app *App) handleEthSend(r gt.Request) gt.Response {
+	p := r.Params
 
-// }
+	var tx gt.Transaction
+	if err := json.Unmarshal([]byte(p[0].(string)), &tx); err != nil {
+		// handle the error
+	}
+
+	// check that no transaction data exists
+
+	o, g := app.Node.HandleTransaction(tx)
+
+	return gt.Response{
+		JsonRpc: "2.0",
+		Id:      2,
+		Error:   []byte(""),
+		Result:  o,
+		GasLeft: g,
+	}
+}
+
+func (app *App) handleEthSendRawTransaction(r gt.Request) gt.Response {
+	p := r.Params
+
+	var tx gt.Transaction
+	if err := json.Unmarshal([]byte(p[0].(string)), &tx); err != nil {
+		// handle the error
+	}
+
+	o, g := app.Node.HandleTransaction(tx)
+
+	return gt.Response{
+		JsonRpc: "2.0",
+		Id:      2,
+		Error:   []byte(""),
+		Result:  o,
+		GasLeft: g,
+	}
+}
 
 func (app *App) handleSetWeather(r gt.Weather) {
 	w := &app.Weather
