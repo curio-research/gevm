@@ -60,9 +60,10 @@ func NewServer() *App {
 			resp = app.handleEthCall(req)
 		case "eth_send":
 			fmt.Println("eth send")
-			// resp = app.handleEthSend(req)
+			resp = app.handleEthSend(req)
 		case "eth_sendRawTransaction":
 			fmt.Println("eth send raw txn")
+			resp = app.handleEthSendRawTransaction(req)
 		case "eth_getBalance":
 			fmt.Println("get bal")
 			// resp = app.handleGetBalance(req)
@@ -81,7 +82,6 @@ func NewServer() *App {
 			}
 		}
 
-		// Result:  json.RawMessage([]byte("0x3503de5f0c766c68f78a03a3b05036a5")),
 		c.PureJSON(http.StatusOK, resp)
 	})
 
