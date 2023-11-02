@@ -33,6 +33,13 @@ type Weather struct {
 	Weather int `json:"weather"`
 }
 
+// keep track of request ids
+type Ids struct {
+	EthCall              int
+	EthSendRawTransaction int
+	EthSend              int
+}
+
 type BlockNumber string
 
 type Address string

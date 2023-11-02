@@ -100,9 +100,12 @@ func (app *App) handleEthCall(r gt.Request) gt.Response {
 
 	o, g := app.Node.HandleTransaction(tx)
 
+	currId := app.Count.EthCall
+	app.Count.EthCall++
+
 	return gt.Response{
 		JsonRpc: "2.0",
-		Id:      9,
+		Id:      currId,
 		Error:   []byte(""),
 		Result:  o,
 		GasLeft: g,
@@ -121,9 +124,12 @@ func (app *App) handleEthSend(r gt.Request) gt.Response {
 
 	o, g := app.Node.HandleTransaction(tx)
 
+	currId := app.Count.EthSend
+	app.Count.EthSend++
+
 	return gt.Response{
 		JsonRpc: "2.0",
-		Id:      2,
+		Id:      currId,
 		Error:   []byte(""),
 		Result:  o,
 		GasLeft: g,
@@ -140,9 +146,12 @@ func (app *App) handleEthSendRawTransaction(r gt.Request) gt.Response {
 
 	o, g := app.Node.HandleTransaction(tx)
 
+	currId := app.Count.EthSend
+	app.Count.EthSendRawTransaction++
+
 	return gt.Response{
 		JsonRpc: "2.0",
-		Id:      2,
+		Id:      currId,
 		Error:   []byte(""),
 		Result:  o,
 		GasLeft: g,
