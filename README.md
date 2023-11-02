@@ -20,3 +20,16 @@ create new EVM.
 create new Contract within EVM.
 call contract using evm.Call.
 check state after Call. 
+
+### token example
+ create token contract
+ mint a token
+ transfer the toke
+
+`cd examples/token && go run main.go`
+
+### precompile example
+ create weather contract
+ call precompile function
+
+`cd examples/precompile && go run main.go`
