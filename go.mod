@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/ethereum/go-ethereum v1.13.1
+	github.com/gin-gonic/gin v1.9.1
 	github.com/holiman/uint256 v1.2.3
 	github.com/kylelemons/godebug v1.1.0
 	github.com/stretchr/testify v1.8.4
@@ -40,7 +41,6 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gballet/go-libpcsclite v0.0.0-20190607065134-2772fd86a8ff // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/gin-gonic/gin v1.9.1 // indirect
 	github.com/go-ole/go-ole v1.2.5 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
