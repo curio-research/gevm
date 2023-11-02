@@ -140,18 +140,24 @@ func (n *NodeCtx) HandleTransaction(txn gevmtypes.Transaction) ([]byte, uint64) 
 		// return empty data types if node context does not exist
 		return []byte(""), 0
 	}
-	value := big.NewInt(0).SetUint64(txn.Value)
-	outputs, gasLeft, vmerr := n.Evm.Call(StringToContractRef(txn.From), StringToAddress(txn.To), []byte(txn.Data), txn.Gas, value)
-	must(vmerr)
-	return outputs, gasLeft
-}
+
+	// if to is nil, it must be a contract creation
+	if txn.To == "" {
+		return n.handleCreateTransaction(txn)
+	} else {
+		value := big.NewInt(0).SetUint64(txn.Value)
+		outputs, gasLeft, vmerr := n.Evm.Call(StringToContractRef(txn.From), StringToAddress(txn.To), []byte(txn.Data), txn.Gas, value)
+		must(vmerr)
+		return outputs, gasLeft
+	}
 
 func (n *NodeCtx) HandleCreateTransaction(txn gevmtypes.Transaction) ([]byte, uint64) {
 	if n == nil {
 		// return empty data types if node context does not exist
 		return []byte(""), 0
-	}
+}
 
+func (n *NodeCtx) handleCreateTransaction(txn gevmtypes.Transaction) ([]byte, uint64) {
 	value := big.NewInt(0).SetUint64(txn.Value)
 	_, contractAddress, gasLeft, vmerr := n.Evm.Create(StringToContractRef(txn.From), []byte(txn.Data), txn.Gas, value)
 	must(vmerr)
