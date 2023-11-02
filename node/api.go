@@ -78,7 +78,7 @@ func NewServer() *App {
 				JsonRpc: "2.0",
 				Id:      2,
 				Error:   nil,
-				Result:  []byte("hello"),
+				Result:  []byte(""),
 			}
 		}
 
