@@ -130,13 +130,13 @@ func TestTPCEthCallPrecompile(t *testing.T) {
 	tx := types.NewContractCreation(nonce, big.NewInt(0), gasLimit, gasPrice, common.FromHex(bytecodeHex))
 	nonce++
 
-	var buff bytes.Buffer
-	err = rlp.Encode(&buff, tx)
+	rlpBytes, err := rlp.EncodeToBytes(tx)
 	if err != nil {
-		log.Fatalf("Failed to encode transaction: %v", err)
+		log.Fatalf("Failed to RLP encode transaction: %v", err)
 	}
+	rawTxHex := fmt.Sprintf("0x%x", rlpBytes)
 
-	rawTxHex := fmt.Sprintf("0x%x", buff.Bytes())
+	fmt.Printf("Raw TX: %s\n", rawTxHex)
 
 	payload := map[string]interface{}{
 		"jsonrpc": "2.0",
@@ -150,10 +150,12 @@ func TestTPCEthCallPrecompile(t *testing.T) {
 		log.Fatalf("Failed to marshal payload: %v", err)
 	}
 
+	w := httptest.NewRecorder()
+
 	req, _ := http.NewRequest("POST", "/rpc", bytes.NewReader(payloadBytes))
 	req.Header.Set("Content-Type", "application/json")
+	assert.Equal(t, 200, w.Code)
 
-	w := httptest.NewRecorder()
 	a.Server.ServeHTTP(w, req)
 
 	// Read the contract ABI
@@ -177,23 +179,28 @@ func TestTPCEthCallPrecompile(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	contractAddress := common.HexToAddress(string(common.HexToAddress("bob")))
+	contractAddress := common.HexToAddress(common.HexToAddress("alice").String())
 
 	tx = types.NewTransaction(nonce, contractAddress, value, gasLimit, gasPrice, data)
-
-	// rawTxBytes := tx.GetRlp(0)
-	// rawTxHex := fmt.Sprintf("0x%x", rawTxBytes) // This is the hex representation of the transaction
+	
+	rlpBytes, err = rlp.EncodeToBytes(tx)
+	if err != nil {
+		log.Fatalf("Failed to RLP encode transaction: %v", err)
+	}
+	rawTxHex = fmt.Sprintf("0x%x", rlpBytes)
 
 	fmt.Printf("Raw TX: %s\n", rawTxHex)
 
-	data = gt.Request{
+	fmt.Printf("Raw TX: %s\n", rawTxHex)
+
+	data1 := gt.Request{
 		JsonRpc: "2.0",
 		Id:      9,
 		Method:  "eth_call",
 		Params:  []interface{}{rawTxHex},
 	}
 
-	jsonData, err := json.Marshal(data)
+	jsonData, err := json.Marshal(data1)
 	if err != nil {
 		t.Fatalf("Error marshaling data: %v", err)
 	}
