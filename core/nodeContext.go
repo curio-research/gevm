@@ -146,6 +146,18 @@ func (n *NodeCtx) HandleTransaction(txn gevmtypes.Transaction) ([]byte, uint64) 
 	return outputs, gasLeft
 }
 
+func (n *NodeCtx) HandleCreateTransaction(txn gevmtypes.Transaction) ([]byte, uint64) {
+	if n == nil {
+		// return empty data types if node context does not exist
+		return []byte(""), 0
+	}
+
+	value := big.NewInt(0).SetUint64(txn.Value)
+	_, contractAddress, gasLeft, vmerr := n.Evm.Create(StringToContractRef(txn.From), []byte(txn.Data), txn.Gas, value)
+	must(vmerr)
+	return contractAddress[:], gasLeft
+}
+
 // HELPER FUNCTIONS
 func StringToContractRef(s string) vm.ContractRef {
 	hex := common.HexToAddress(s)

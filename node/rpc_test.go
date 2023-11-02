@@ -182,6 +182,7 @@ func TestTPCEthCallPrecompile(t *testing.T) {
 	contractAddress := common.HexToAddress(common.HexToAddress("alice").String())
 
 	tx = types.NewTransaction(nonce, contractAddress, value, gasLimit, gasPrice, data)
+	nonce++
 	
 	rlpBytes, err = rlp.EncodeToBytes(tx)
 	if err != nil {
