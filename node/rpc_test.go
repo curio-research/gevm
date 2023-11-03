@@ -2,7 +2,9 @@ package node
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
+
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -106,12 +108,79 @@ func TestRPCEthSend(t *testing.T) {
 	fmt.Println(w)
 }
 
+func TestRPCGetBalance(t *testing.T) {
+	tx := types.NewTransaction(0, common.HexToAddress("bob"), big.NewInt(100), 1000000000, big.NewInt(20000), nil)
+
+	// RLP encode the signed transaction
+	rlpBytes, err := rlp.EncodeToBytes(tx)
+	if err != nil {
+		log.Fatalf("Failed to RLP encode transaction: %v", err)
+	}
+	rawTxHex := fmt.Sprintf("0x%x", rlpBytes)
+
+	fmt.Printf("Raw TX: %s\n", rawTxHex)
+
+	w := httptest.NewRecorder()
+
+	data := gt.Request{
+		JsonRpc: "2.0",
+		Id:      9,
+		Method:  "eth_getBalance",
+		Params:  []interface{}{rawTxHex},
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		t.Fatalf("Error marshaling data: %v", err)
+	}
+
+	req, _ := http.NewRequest("POST", "/rpc", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+
+	a.Server.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+
+	responseBody := w.Body.String()
+	fmt.Println("Raw Response Body:", responseBody)
+
+	// Attempt to unmarshal the response body
+	var rmap map[string]interface{}
+	err = json.Unmarshal([]byte(responseBody), &rmap)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
+
+	// Check if the "result" key exists and assert it to a string.
+	resultInterface, ok := rmap["result"]
+	if !ok {
+		log.Fatal("The key 'result' is not present in the response map.")
+	}
+
+	resultStr, ok := resultInterface.(string)
+	if !ok {
+		log.Fatal("The 'result' field is not of type string.")
+	}
+
+	// Decode the base64-encoded string to get the bytes.
+	resultBytes, err := base64.StdEncoding.DecodeString(resultStr)
+	if err != nil {
+		log.Fatalf("Failed to decode base64 string: %v", err)
+	}
+	fmt.Println("result of getBalance:", BytesToUint64(resultBytes))
+
+	// if resValue, ok := result["result"]; ok {
+	// } else {
+	// 	t.Fatal("Key 'result' not found in response JSON")
+	// }
+	// fmt.Println("result of getBalance", w)
+}
 func TestTPCEthCallPrecompile(t *testing.T) {
 	// value := big.NewInt(0) // this is a call transaction, the value is zero
 	nonce := uint64(0)                  // account nonce
 	gasLimit := uint64(1000000)         // gas limit for contract creation
 	gasPrice := big.NewInt(10000000000) // Set an appropriate gas price
 	value := big.NewInt(1)
+	contract := common.HexToAddress("precompile")
 
 	// Read the contract bytecode
 	bytecodePath := "../examples/precompile/weather.bin"
@@ -179,18 +248,16 @@ func TestTPCEthCallPrecompile(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	contractAddress := common.HexToAddress(common.HexToAddress("alice").String())
+	contractAddress := common.HexToAddress(contract.String())
 
 	tx = types.NewTransaction(nonce, contractAddress, value, gasLimit, gasPrice, data)
 	nonce++
-	
+
 	rlpBytes, err = rlp.EncodeToBytes(tx)
 	if err != nil {
 		log.Fatalf("Failed to RLP encode transaction: %v", err)
 	}
 	rawTxHex = fmt.Sprintf("0x%x", rlpBytes)
-
-	fmt.Printf("Raw TX: %s\n", rawTxHex)
 
 	fmt.Printf("Raw TX: %s\n", rawTxHex)
 
@@ -210,5 +277,7 @@ func TestTPCEthCallPrecompile(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 
 	a.Server.ServeHTTP(w, req)
+
+	fmt.Println("precompile", w.Result())
 	assert.Equal(t, 200, w.Code)
 }
