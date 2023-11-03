@@ -14,15 +14,18 @@ type App struct {
 	Server  *gin.Engine
 	Node    cvm.NodeCtx
 	Weather gt.Weather
+	Count   *gt.Ids
 }
 
 func NewServer() *App {
 	app := &App{
 		Server:  gin.Default(),
 		Node:    cvm.Default(),
-		Weather: gt.Weather{0}, // initialize to 0
+		Weather: gt.Weather{},
+		Count:   &gt.Ids{},
 	}
 
+	// simple sanity check
 	app.Server.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"jsonrpc": "2.0", "id": 1, "result": "0x3503de5f0c766c68f78a03a3b05036a5"})
 	})
@@ -66,7 +69,7 @@ func NewServer() *App {
 			resp = app.handleEthSendRawTransaction(req)
 		case "eth_getBalance":
 			fmt.Println("get bal")
-			// resp = app.handleGetBalance(req)
+			resp = app.handleEthGetBalance(req)
 		case "eth_getTransactionCount":
 			fmt.Println("get transaction count")
 			// resp = app.handleGetTxCount(req)
