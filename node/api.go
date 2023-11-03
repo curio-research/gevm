@@ -158,6 +158,29 @@ func (app *App) handleEthSendRawTransaction(r gt.Request) gt.Response {
 	}
 }
 
+func (app *App) handleEthGetBalance(r gt.Request) gt.Response {
+	p := r.Params
+
+	var tx gt.Transaction
+	if err := json.Unmarshal([]byte(p[0].(string)), &tx); err != nil {
+		// handle the error
+	}
+
+	o := app.Node.HandleGetBalance(tx)
+
+	currId := app.Count.EthSend
+	app.Count.EthSendRawTransaction++
+
+	return gt.Response{
+		JsonRpc: "2.0",
+		Id:      currId,
+		Error:   []byte(""),
+		Result:  Uint64ToBytes(o),
+		GasLeft: 0,
+	}
+
+}
+
 func (app *App) handleSetWeather(r gt.Weather) {
 	w := &app.Weather
 	w.Weather = r.Weather

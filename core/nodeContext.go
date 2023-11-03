@@ -150,11 +150,13 @@ func (n *NodeCtx) HandleTransaction(txn gevmtypes.Transaction) ([]byte, uint64) 
 		must(vmerr)
 		return outputs, gasLeft
 	}
+}
 
-func (n *NodeCtx) HandleCreateTransaction(txn gevmtypes.Transaction) ([]byte, uint64) {
-	if n == nil {
-		// return empty data types if node context does not exist
-		return []byte(""), 0
+ // READ ONLY 
+
+func (n *NodeCtx) HandleGetBalance(txn gevmtypes.Transaction) (uint64) {
+	bal := n.StateDB.GetBalance(StringToAddress(txn.From)).Uint64()
+	return bal
 }
 
 func (n *NodeCtx) handleCreateTransaction(txn gevmtypes.Transaction) ([]byte, uint64) {
