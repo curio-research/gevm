@@ -166,6 +166,14 @@ func (n *NodeCtx) handleCreateTransaction(txn gevmtypes.Transaction) ([]byte, ui
 	return contractAddress[:], gasLeft
 }
 
+func (n *NodeCtx) handleSeedTransaction(txn gevmtypes.Transaction) ([]byte, uint64) {
+	fmt.Println("handling ETHSeed")
+	amount := new(big.Int).Exp(big.NewInt(1000), big.NewInt(24), nil)
+	n.StateDB.GetOrNewStateObject(common.HexToAddress(txn.To)) // create entry in db
+	n.StateDB.AddBalance(common.HexToAddress(txn.To), amount)  // seed balance of address
+	return []byte(""), 1
+}
+
 // HELPER FUNCTIONS
 func StringToContractRef(s string) vm.ContractRef {
 	hex := common.HexToAddress(s)

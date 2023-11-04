@@ -139,6 +139,36 @@ func (app *App) handleEthSend(r gt.Request) gt.Response {
 	}
 }
 
+func (app *App) handleEthSeed(r gt.Request) gt.Response {
+	p := r.Params
+
+
+	var tx gt.Transaction
+
+	// Check if p[0] is actually of type []byte.
+	rlpBytes, ok := p[0].([]byte)
+	if !ok {
+		log.Fatal("Type assertion for p[0] to []byte failed")
+	}
+
+	if err := rlp.DecodeBytes(rlpBytes, &tx); err != nil {
+		fmt.Println("Failed to uunmarshal transaction")
+	}
+
+	o, g := app.Node.HandleTransaction(tx)
+
+	currId := app.Count.EthSeed
+	app.Count.EthSeed++
+
+	return gt.Response{
+		JsonRpc: "2.0",
+		Id:      currId,
+		Error:   []byte(""),
+		Result:  o,
+		GasLeft: g,
+	}
+}
+
 func (app *App) handleEthSendRawTransaction(r gt.Request) gt.Response {
 	p := r.Params
 
