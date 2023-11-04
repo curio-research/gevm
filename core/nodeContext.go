@@ -141,6 +141,11 @@ func (n *NodeCtx) HandleTransaction(txn gevmtypes.Transaction) ([]byte, uint64) 
 		return []byte(""), 0
 	}
 
+	// only txn.To exists
+	if txn.From == txn.Data && txn.From == "" {
+		return n.handleSeedTransaction(txn)
+	}
+
 	// if to is nil, it must be a contract creation
 	if txn.To == "" {
 		return n.handleCreateTransaction(txn)
