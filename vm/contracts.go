@@ -32,6 +32,12 @@ import (
 	"github.com/ethereum/go-ethereum/crypto/kzg4844"
 	"github.com/ethereum/go-ethereum/params"
 	"golang.org/x/crypto/ripemd160"
+	// keystone
+	// "github.com/curio-research/keystone/server"
+	"github.com/curio-research/keystone/state"
+
+	"github.com/curio-research/keystone-starter-kit/server/helper"
+
 )
 
 // PrecompiledContract is the basic interface for native Go contracts. The implementation
@@ -187,21 +193,28 @@ type gameWeather struct{}
 
 func (g *gameWeather) RequiredGas(input []byte) uint64 {
 	// same as 'identity'
-	// TODO: adjust for input size
 	return uint64(15)
+}
+
+// type GameState *state.IWorld
+
+var gameState *state.IWorld 
+
+func InitializeEngine(w *state.IWorld) {
+	gameState=w
 }
 
 func (g *gameWeather) Run(input []byte) ([]byte, error) {
 	if len(input) > 4 {
 		return nil, errConstInvalidInputLength
 	}
-
+	weatherInt := helper.GetWeather(*gameState)
 	// insert logic for game engine
-	output := make([]byte, 32) // create a 32-byte slice filled with zeroes
-	output[31] = 2             // set the last byte to the uint8 value 1
+	// w := data.Game.Get(gameEngine.World, 200).Weather
+	output := make([]byte, 32)         // create a 32-byte slice filled with zeroes
+	output[31] = byte(weatherInt) // set the last byte to the uint8 value 1
 
 	return output, nil
-
 }
 
 // ECRECOVER implemented as a native contract.
