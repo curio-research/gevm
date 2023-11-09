@@ -50,7 +50,7 @@ func getTPS(start time.Time, end time.Time) int64 {
 	return sec.Nanoseconds() / dur.Nanoseconds()
 }
 
-func precompileFromExisting(node *ec.NodeCtx) {
+func RunPrecompile(node *ec.NodeCtx) {
 	binFilePath := "./weather.bin"
 	abiFilePath := "./weather.abi"
 	data := loadBin(binFilePath)
