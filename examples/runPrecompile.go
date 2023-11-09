@@ -51,8 +51,8 @@ func getTPS(start time.Time, end time.Time) int64 {
 }
 
 func RunPrecompile(node *ec.NodeCtx) {
-	binFilePath := "./weather.bin"
-	abiFilePath := "./weather.abi"
+	binFilePath := "./precompile/weather.bin"
+	abiFilePath := "./precompile/weather.abi"
 	data := loadBin(binFilePath)
 	abiObj := loadAbi(abiFilePath)
 
