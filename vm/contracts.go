@@ -34,9 +34,8 @@ import (
 	"golang.org/x/crypto/ripemd160"
 
 	// keystone
-	// "github.com/curio-research/keystone/server"
 	"github.com/curio-research/keystone/server"
-	"github.com/curio-research/keystone/state"
+	// "github.com/curio-research/keystone/state"
 
 	"github.com/curio-research/keystone-starter-kit/server/helper"
 )
