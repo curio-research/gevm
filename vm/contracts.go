@@ -32,12 +32,13 @@ import (
 	"github.com/ethereum/go-ethereum/crypto/kzg4844"
 	"github.com/ethereum/go-ethereum/params"
 	"golang.org/x/crypto/ripemd160"
+
 	// keystone
 	// "github.com/curio-research/keystone/server"
+	"github.com/curio-research/keystone/server"
 	"github.com/curio-research/keystone/state"
 
 	"github.com/curio-research/keystone-starter-kit/server/helper"
-
 )
 
 // PrecompiledContract is the basic interface for native Go contracts. The implementation
@@ -198,9 +199,9 @@ func (g *gameWeather) RequiredGas(input []byte) uint64 {
 
 // type GameState *state.IWorld
 
-var gameState *state.IWorld 
+var gameState *server.EngineCtx
 
-func InitializeEngine(w *state.IWorld) {
+func InitializeEngine(w *server.EngineCtx) {
 	gameState=w
 }
 
@@ -208,7 +209,7 @@ func (g *gameWeather) Run(input []byte) ([]byte, error) {
 	if len(input) > 4 {
 		return nil, errConstInvalidInputLength
 	}
-	weatherInt := helper.GetWeather(*gameState)
+	weatherInt := helper.GetWeather(gameState)
 	// insert logic for game engine
 	// w := data.Game.Get(gameEngine.World, 200).Weather
 	output := make([]byte, 32)         // create a 32-byte slice filled with zeroes
