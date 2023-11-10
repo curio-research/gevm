@@ -138,7 +138,8 @@ func (app *App) handleEthSend(r gt.Request) gt.Response {
 		GasLeft: g,
 	}
 }
-
+ 
+/*
 func (app *App) handleEthSeed(r gt.Request) gt.Response {
 	p := r.Params
 
@@ -168,6 +169,7 @@ func (app *App) handleEthSeed(r gt.Request) gt.Response {
 		GasLeft: g,
 	}
 }
+**/
 
 func (app *App) handleEthSendRawTransaction(r gt.Request) gt.Response {
 	p := r.Params
