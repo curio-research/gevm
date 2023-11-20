@@ -1,6 +1,14 @@
 package node
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"encoding/hex"
+	"fmt"
+	"log"
+
+	"github.com/daweth/gevm/gevmtypes"
+	"github.com/ethereum/go-ethereum/rlp"
+)
 
 // Uint64ToBytes converts a uint64 to a slice of 8 bytes
 func Uint64ToBytes(num uint64) []byte {
