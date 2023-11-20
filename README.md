@@ -1,7 +1,4 @@
 # gevm
-extremely minimal POC of an in-memory blockchain, (headers)
-with persistent state via PebbleDB.
-
 in-memory blockchain, with custom RPC and headers
 that persists state via PebbleDB.
 
