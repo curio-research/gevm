@@ -144,18 +144,18 @@ func (n *NodeCtx) HandleTransaction(txn gevmtypes.Transaction) ([]byte, uint64) 
 
 	// only txn.To exists
 	if txn.From == txn.Data && txn.From == "" {
-		// upsert the account
+		// upsert the account that exists
 		n.StateDB.GetOrNewStateObject(common.HexToAddress(txn.To)) // create entry in db
 		return n.handleSeedTransaction(txn)
 	}
 
-	// if to is nil, it must be a contract creation
+	// only txn.From exists, it must be a contract creation
 	if txn.To == "" {
 		// upsert the account
 		n.StateDB.GetOrNewStateObject(common.HexToAddress(txn.From)) // create entry in db
 		return n.handleCreateTransaction(txn)
 	} else {
-		// upsert both accounts
+		// upsert both accounts since both exist
 		n.StateDB.GetOrNewStateObject(common.HexToAddress(txn.To)) // create entry in db
 		n.StateDB.GetOrNewStateObject(common.HexToAddress(txn.From)) // create entry in db
 		value := big.NewInt(0).SetUint64(txn.Value)
@@ -166,7 +166,6 @@ func (n *NodeCtx) HandleTransaction(txn gevmtypes.Transaction) ([]byte, uint64) 
 }
 
  // READ ONLY 
-
 func (n *NodeCtx) HandleGetBalance(txn gevmtypes.Transaction) (uint64) {
 	bal := n.StateDB.GetBalance(StringToAddress(txn.From)).Uint64()
 	return bal
