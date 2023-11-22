@@ -18,7 +18,7 @@ import (
 
 var (
 	testAddress      = common.HexToAddress("alice")
-	toAddress    = common.HexToAddress("bob")
+	toAddress        = common.HexToAddress("bob")
 	uncreatedAddress = common.HexToAddress("vitalik")
 	amount           = big.NewInt(1)
 	accountNonce     = uint64(0)
@@ -89,7 +89,7 @@ func main() {
 	startTime := time.Now()
 	fmt.Println("begin to exec contract")
 	node.StateDB.SetCode(testAddress, contractCode)
-	outputs, gasLeft, vmerr := node.Evm.Call(contractRef, testAddress, input, node.StateDB.GetBalance(testAddress).Uint64(), big.NewInt(0))
+	outputs, gasLeft, vmerr := node.Evm.Call(contractRef, testAddress, input, node.StateDB.GetBalance(testAddress).Uint64(), big.NewInt(1000))
 	must(vmerr)
 	endTime := time.Now()
 
@@ -112,4 +112,6 @@ func main() {
 		}
 	}
 	fmt.Printf("Output %#v\n", hexutil.Encode(outputs))
+
+	// check vitalik's balance
 }
