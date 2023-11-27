@@ -31,3 +31,11 @@ check state after Call.
  call precompile function
 
 `cd examples/precompile && go run main.go`
+
+### upsert example
+create a contract that has one function:
+  to send ether to a designated addr
+call contract to an uninitialized addr
+verify upsert account
+
+`cd examples/upsert && go run main.go`
