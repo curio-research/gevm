@@ -30,10 +30,6 @@ func NewServer() *App {
 		c.JSON(http.StatusOK, gin.H{"jsonrpc": "2.0", "id": 1, "result": "0x3503de5f0c766c68f78a03a3b05036a5"})
 	})
 
-	// since we don't have signatures they need to be manually created in db
-	// app.Server.POST("/addAccount", func(c *gin.Context)) {
-	// }
-
 	app.Server.POST("/setWeather", func(c *gin.Context) {
 		fmt.Println("printing the request body", c.Request.Body)
 		var w gt.Weather
