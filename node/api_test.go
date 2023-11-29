@@ -55,11 +55,30 @@ func TestPingRoute(t *testing.T) {
 func TestRPCEthCall(t *testing.T) {
 	w := httptest.NewRecorder()
 
+	txn := gt.Transaction{
+		From:     common.HexToAddress("0x1").Hex(),
+		To:       common.HexToAddress("0x2").Hex(),
+		Gas:      1000000,
+		GasPrice: 1000000000,
+		Value:    1000000000000000000,
+		Data:     "0x0",
+	}
+
+	rlpBytes, err := rlp.EncodeToBytes(txn)
+	if err != nil {
+		log.Fatalf("Failed to RLP encode transaction: %v", err)
+	}
+
+	// Convert RLP byte slice to hex string
+	rawTxHex := hex.EncodeToString(rlpBytes)
+
+	fmt.Println("Raw Transaction Hex:", rawTxHex)
+
 	data := gt.Request{
 		JsonRpc: "2.0",
 		Id:      9,
 		Method:  "eth_call",
-		Params:  []interface{}{"Hello", "World"},
+		Params:  []interface{}{rawTxHex},
 	}
 
 	jsonData, err := json.Marshal(data)
