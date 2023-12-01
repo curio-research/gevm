@@ -35,11 +35,21 @@ type Weather struct {
 
 // keep track of request ids
 type Ids struct {
-	EthCall              int
+	EthCall               int
 	EthSendRawTransaction int
-	EthSend              int
+	EthSend               int
+	EthSeed               int
 }
 
 type BlockNumber string
 
 type Address string
+
+// func(*t Transaction) NewTransaction (from string, to string, gas uint64, gasPrice uint64, value uint64, data string) {
+// 	t.From = from
+// 	t.To = to
+// 	t.Gas = gas
+// 	t.GasPrice = gasPrice
+// 	t.Value = value
+// 	t.Data = data
+// }
