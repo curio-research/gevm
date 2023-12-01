@@ -111,10 +111,7 @@ func (app *App) handleEthSend(r gt.Request) gt.Response {
 	p := r.Params
 
 	var tx gt.Transaction
-	if err := json.Unmarshal([]byte(p[0].(string)), &tx); err != nil {
-		// handle the error
-	}
-
+	tx = RawTxToTxObject(p[0].(string))
 	// check that no transaction data exists
 
 	o, g := app.Node.HandleTransaction(tx)
