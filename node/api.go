@@ -1,7 +1,6 @@
 package node
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -155,9 +154,7 @@ func (app *App) handleEthSendRawTransaction(r gt.Request) gt.Response {
 	p := r.Params
 
 	var tx gt.Transaction
-	if err := json.Unmarshal([]byte(p[0].(string)), &tx); err != nil {
-		// handle the error
-	}
+	tx = RawTxToTxObject(p[0].(string))
 
 	o, g := app.Node.HandleTransaction(tx)
 
@@ -177,9 +174,7 @@ func (app *App) handleEthGetBalance(r gt.Request) gt.Response {
 	p := r.Params
 
 	var tx gt.Transaction
-	if err := json.Unmarshal([]byte(p[0].(string)), &tx); err != nil {
-		// handle the error
-	}
+	tx = RawTxToTxObject(p[0].(string))
 
 	o := app.Node.HandleGetBalance(tx)
 
