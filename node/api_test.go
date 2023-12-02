@@ -95,6 +95,60 @@ func TestRPCEthCall(t *testing.T) {
 
 func TestRPCUpsertAccount(t *testing.T) {
 	// tx sending
+	tx := gt.Transaction{
+		From:     common.HexToAddress("0x1").Hex(),
+		To:       common.HexToAddress("0xbeef").Hex(),
+		Gas:      1000000,
+		GasPrice: 1000000000,
+		Value:    0,
+		Data:     "0x0",
+	}
+
+	rlpBytes, err := rlp.EncodeToBytes(tx)
+	if err != nil {
+		log.Fatalf("Failed to RLP encode transaction: %v", err)
+	}
+
+	// Convert RLP byte slice to hex string
+	rawTxHex := hex.EncodeToString(rlpBytes)
+
+	fmt.Println("Raw Transaction Hex:", rawTxHex)
+	w := httptest.NewRecorder()
+	data := gt.Request{
+		JsonRpc: "2.0",
+		Id:      9,
+		Method:  "eth_sendRawTransaction",
+		Params:  []interface{}{rawTxHex},
+	}
+
+	// RLP encode the signed transaction
+	rlpBytes, err = rlp.EncodeToBytes(tx)
+	if err != nil {
+		log.Fatalf("Failed to RLP encode transaction: %v", err)
+	}
+	rawTxHex = fmt.Sprintf("0x%x", rlpBytes)
+
+	fmt.Printf("Raw TX: %s\n", rawTxHex)
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		t.Fatalf("Error marshaling data: %v", err)
+	}
+
+	req, _ := http.NewRequest("POST", "/rpc", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+
+	a.Server.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	fmt.Println(w)
+
+}
+
+/**
+// in the case that a previously unseen account is interacted with through
+// something like a contract call
+func TestRPCUpsertAccountIndirectly(t *testing.T) {
+	// tx sending
 	tx := types.NewTransaction(0, common.HexToAddress("UNKNOWN"), big.NewInt(100), 1000000000, big.NewInt(20000), nil)
 	w := httptest.NewRecorder()
 	data := gt.Request{
