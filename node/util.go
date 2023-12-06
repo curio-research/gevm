@@ -48,8 +48,24 @@ func RawTxToTxObject(rawTxHex string) gevmtypes.Transaction {
 		log.Fatalf("Failed to RLP decode transaction: %v", err)
 	}
 
+	// debug
 	fmt.Printf("Decoded TX: %+v\n", tx)
 	return tx
+}
+
+func TxObjectToRawTx(tx gevmtypes.Transaction) string {
+	// Encode the transaction to RLP
+	rlpBytes, err := rlp.EncodeToBytes(tx)
+	if err != nil {
+		log.Fatalf("Failed to RLP encode transaction: %v", err)
+	}
+
+	// Encode the RLP bytes to a hex string
+	rawTxHex := hex.EncodeToString(rlpBytes)
+
+	// debug
+	fmt.Printf("Encoded TX: %s\n", rawTxHex)
+	return rawTxHex
 }
 
 // check that an interface is a string
