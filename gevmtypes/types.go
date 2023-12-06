@@ -45,11 +45,14 @@ type BlockNumber string
 
 type Address string
 
-// func(*t Transaction) NewTransaction (from string, to string, gas uint64, gasPrice uint64, value uint64, data string) {
-// 	t.From = from
-// 	t.To = to
-// 	t.Gas = gas
-// 	t.GasPrice = gasPrice
-// 	t.Value = value
-// 	t.Data = data
-// }
+// newTransaction creates and returns a pointer to a new Transaction
+func NewTransaction(from, to string, gas, gasPrice, value uint64, data string) *Transaction {
+    return &Transaction{
+        From:     from,
+        To:       to,
+        Gas:      gas,
+        GasPrice: gasPrice,
+        Value:    value,
+        Data:     data,
+    }
+}
