@@ -68,6 +68,15 @@ func TxObjectToRawTx(tx gevmtypes.Transaction) string {
 	return rawTxHex
 }
 
+func RawTxHexToRequest(rawTxHex string, method string) gevmtypes.Request {
+	return gevmtypes.Request{
+		JsonRpc: "2.0",
+		Id:      0, // should autoincrement?
+		Method:  method,
+		Params:  []interface{}{rawTxHex},
+	}
+}
+
 // check that an interface is a string
 func interfaceIsString(i interface{}) bool {
 	_, ok := i.(string)
