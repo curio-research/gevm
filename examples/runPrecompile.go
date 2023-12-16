@@ -1,4 +1,4 @@
-package main
+package examples
 
 import (
 	"fmt"
@@ -8,13 +8,11 @@ import (
 	"time"
 
 	ec "github.com/daweth/gevm/core"
+	"github.com/daweth/gevm/vm"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	gm "github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
 )
 
 var (
@@ -24,7 +22,6 @@ var (
 	accountNonce = uint64(0)
 	gasLimit     = uint64(1000000)
 	gasUsed      = uint64(1)
-	codeStr      = "0x6060604052341561000f57600080fd5b60b18061001d6000396000f300606060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063c6888fa1146044575b600080fd5b3415604e57600080fd5b606260048080359060200190919050506078565b6040518082815260200191505060405180910390f35b60006007820290509190505600a165627a7a72305820c4ac950a92caa9944a7e07e030542e9ed7db92631adcc234d86a105c853b81a20029"
 	blobHashes   = []common.Hash{}
 )
 
@@ -53,9 +50,9 @@ func getTPS(start time.Time, end time.Time) int64 {
 	return sec.Nanoseconds() / dur.Nanoseconds()
 }
 
-func main() {
-	binFilePath := "./sum.bin"
-	abiFilePath := "./sum.abi"
+func RunPrecompile(node *ec.NodeCtx) {
+	binFilePath := "./precompile/weather.bin"
+	abiFilePath := "./precompile/weather.abi"
 	data := loadBin(binFilePath)
 	abiObj := loadAbi(abiFilePath)
 
@@ -64,7 +61,6 @@ func main() {
 	bob, err := toAddress.MarshalText()
 	must(err)
 
-	node := ec.NewNodeContext(gasLimit, gasUsed, testAddress, toAddress)
 	fmt.Println("Alice Addr=", alice)
 	fmt.Println("Bob Addr=", bob)
 
@@ -82,9 +78,8 @@ func main() {
 	fmt.Println("after contract creation, testBalance=", testBalance, contractCode)
 
 	// calling the contract
-	method := abiObj.Methods["multiply"]
-	pm := gm.U256Bytes(big.NewInt(10))
-	input := append(method.ID, pm...)
+	method := abiObj.Methods["getCurrentGameWeather"]
+	input := append(method.ID)
 	fmt.Println(hexutil.Encode(input))
 
 	startTime := time.Now()
@@ -114,11 +109,4 @@ func main() {
 	}
 	fmt.Printf("Output %#v\n", hexutil.Encode(outputs))
 
-}
-
-type ChainContext struct{}
-
-func (cc ChainContext) GetHeader(hash common.Hash, number uint64) *types.Header {
-	fmt.Println("(cc ChainContext) GetHeader (hash common.Hash, number uint64)")
-	return nil
 }

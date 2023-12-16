@@ -17,15 +17,16 @@
 package core
 
 import (
+	"fmt"
 	"math/big"
 
-	//	"github.com/daweth/gevm/types"
-	//	"github.com/daweth/gevm/vm"
+	"github.com/daweth/gevm/types"
+	"github.com/daweth/gevm/vm"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
+	// "github.com/ethereum/go-ethereum/core/types"
+	// "github.com/ethereum/go-ethereum/core/vm"
 )
 
 // ChainContext supports retrieving headers and consensus parameters from the
@@ -124,4 +125,12 @@ func CanTransfer(db vm.StateDB, addr common.Address, amount *big.Int) bool {
 func Transfer(db vm.StateDB, sender, recipient common.Address, amount *big.Int) {
 	db.SubBalance(sender, amount)
 	db.AddBalance(recipient, amount)
+}
+
+// default chainContext implementation
+type EmptyChainContext struct{}
+
+func (cc EmptyChainContext) GetHeader(hash common.Hash, number uint64) *types.Header {
+	fmt.Println("(cc ChainContext) GetHeader (hash common.Hash, number uint64)")
+	return nil
 }

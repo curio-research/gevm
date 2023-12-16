@@ -23,7 +23,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/daweth/gevm/types"
+
+	// "github.com/daweth/gevm/types"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 func filledStateDB() *StateDB {

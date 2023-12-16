@@ -32,6 +32,12 @@ import (
 	"github.com/ethereum/go-ethereum/crypto/kzg4844"
 	"github.com/ethereum/go-ethereum/params"
 	"golang.org/x/crypto/ripemd160"
+
+	// keystone
+	"github.com/curio-research/keystone/server"
+	// "github.com/curio-research/keystone/state"
+
+	"github.com/curio-research/keystone-starter-kit/server/helper"
 )
 
 // PrecompiledContract is the basic interface for native Go contracts. The implementation
@@ -81,15 +87,16 @@ var PrecompiledContractsIstanbul = map[common.Address]PrecompiledContract{
 // PrecompiledContractsBerlin contains the default set of pre-compiled Ethereum
 // contracts used in the Berlin release.
 var PrecompiledContractsBerlin = map[common.Address]PrecompiledContract{
-	common.BytesToAddress([]byte{1}): &ecrecover{},
-	common.BytesToAddress([]byte{2}): &sha256hash{},
-	common.BytesToAddress([]byte{3}): &ripemd160hash{},
-	common.BytesToAddress([]byte{4}): &dataCopy{},
-	common.BytesToAddress([]byte{5}): &bigModExp{eip2565: true},
-	common.BytesToAddress([]byte{6}): &bn256AddIstanbul{},
-	common.BytesToAddress([]byte{7}): &bn256ScalarMulIstanbul{},
-	common.BytesToAddress([]byte{8}): &bn256PairingIstanbul{},
-	common.BytesToAddress([]byte{9}): &blake2F{},
+	common.BytesToAddress([]byte{1}):    &ecrecover{},
+	common.BytesToAddress([]byte{2}):    &sha256hash{},
+	common.BytesToAddress([]byte{3}):    &ripemd160hash{},
+	common.BytesToAddress([]byte{4}):    &dataCopy{},
+	common.BytesToAddress([]byte{5}):    &bigModExp{eip2565: true},
+	common.BytesToAddress([]byte{6}):    &bn256AddIstanbul{},
+	common.BytesToAddress([]byte{7}):    &bn256ScalarMulIstanbul{},
+	common.BytesToAddress([]byte{8}):    &bn256PairingIstanbul{},
+	common.BytesToAddress([]byte{9}):    &blake2F{},
+	common.BytesToAddress([]byte{0x0b}): &gameWeather{},
 }
 
 // PrecompiledContractsCancun contains the default set of pre-compiled Ethereum
@@ -176,6 +183,38 @@ func RunPrecompiledContract(p PrecompiledContract, input []byte, suppliedGas uin
 	suppliedGas -= gasCost
 	output, err := p.Run(input)
 	return output, suppliedGas, err
+}
+
+var (
+	errConstInvalidInputLength = errors.New("invalid input length")
+)
+
+type gameWeather struct{}
+
+func (g *gameWeather) RequiredGas(input []byte) uint64 {
+	// same as 'identity'
+	return uint64(15)
+}
+
+// type GameState *state.IWorld
+
+var gameState *server.EngineCtx
+
+func InitializeEngine(w *server.EngineCtx) {
+	gameState=w
+}
+
+func (g *gameWeather) Run(input []byte) ([]byte, error) {
+	if len(input) > 4 {
+		return nil, errConstInvalidInputLength
+	}
+	weatherInt := helper.GetWeather(gameState)
+	// insert logic for game engine
+	// w := data.Game.Get(gameEngine.World, 200).Weather
+	output := make([]byte, 32)         // create a 32-byte slice filled with zeroes
+	output[31] = byte(weatherInt) // set the last byte to the uint8 value 1
+
+	return output, nil
 }
 
 // ECRECOVER implemented as a native contract.

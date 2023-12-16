@@ -12,20 +12,19 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	gm "github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
+	// gm "github.com/ethereum/go-ethereum/common/math"
 )
 
 var (
-	testAddress  = common.HexToAddress("alice")
-	toAddress    = common.HexToAddress("bob")
-	amount       = big.NewInt(1)
-	accountNonce = uint64(0)
-	gasLimit     = uint64(1000000)
-	gasUsed      = uint64(1)
-	codeStr      = "0x6060604052341561000f57600080fd5b60b18061001d6000396000f300606060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063c6888fa1146044575b600080fd5b3415604e57600080fd5b606260048080359060200190919050506078565b6040518082815260200191505060405180910390f35b60006007820290509190505600a165627a7a72305820c4ac950a92caa9944a7e07e030542e9ed7db92631adcc234d86a105c853b81a20029"
-	blobHashes   = []common.Hash{}
+	testAddress      = common.HexToAddress("alice")
+	toAddress        = common.HexToAddress("bob")
+	uncreatedAddress = common.HexToAddress("vitalik")
+	amount           = big.NewInt(1)
+	accountNonce     = uint64(0)
+	gasLimit         = uint64(1000000)
+	gasUsed          = uint64(1)
+	blobHashes       = []common.Hash{}
 )
 
 func must(err error) {
@@ -54,19 +53,19 @@ func getTPS(start time.Time, end time.Time) int64 {
 }
 
 func main() {
-	binFilePath := "./sum.bin"
-	abiFilePath := "./sum.abi"
+	binFilePath := "./upsert.bin"
+	abiFilePath := "./upsert.abi"
 	data := loadBin(binFilePath)
 	abiObj := loadAbi(abiFilePath)
 
 	alice, err := testAddress.MarshalText()
 	must(err)
-	bob, err := toAddress.MarshalText()
+	vitalik, err := uncreatedAddress.MarshalText()
 	must(err)
 
 	node := ec.NewNodeContext(gasLimit, gasUsed, testAddress, toAddress)
 	fmt.Println("Alice Addr=", alice)
-	fmt.Println("Bob Addr=", bob)
+	fmt.Println("Vitalik Addr=", vitalik)
 
 	// creating the contract
 	fmt.Println("balance: ", node.StateDB.GetBalance(testAddress).Uint64())
@@ -82,15 +81,15 @@ func main() {
 	fmt.Println("after contract creation, testBalance=", testBalance, contractCode)
 
 	// calling the contract
-	method := abiObj.Methods["multiply"]
-	pm := gm.U256Bytes(big.NewInt(10))
+	method := abiObj.Methods["sendETH"]
+	pm := vitalik
 	input := append(method.ID, pm...)
 	fmt.Println(hexutil.Encode(input))
 
 	startTime := time.Now()
 	fmt.Println("begin to exec contract")
 	node.StateDB.SetCode(testAddress, contractCode)
-	outputs, gasLeft, vmerr := node.Evm.Call(contractRef, testAddress, input, node.StateDB.GetBalance(testAddress).Uint64(), big.NewInt(0))
+	outputs, gasLeft, vmerr := node.Evm.Call(contractRef, testAddress, input, node.StateDB.GetBalance(testAddress).Uint64(), big.NewInt(1000))
 	must(vmerr)
 	endTime := time.Now()
 
@@ -114,11 +113,5 @@ func main() {
 	}
 	fmt.Printf("Output %#v\n", hexutil.Encode(outputs))
 
-}
-
-type ChainContext struct{}
-
-func (cc ChainContext) GetHeader(hash common.Hash, number uint64) *types.Header {
-	fmt.Println("(cc ChainContext) GetHeader (hash common.Hash, number uint64)")
-	return nil
+	// check vitalik's balance
 }

@@ -23,8 +23,11 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/daweth/gevm/types"
-	"github.com/daweth/gevm/state"
+	// "github.com/daweth/gevm/types"
+	// "github.com/daweth/gevm/state"
+
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
